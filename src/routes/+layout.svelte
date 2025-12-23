@@ -2,6 +2,7 @@
 	import file_480 from '$lib/assets/file_480.png';
 	import favicon from '$lib/assets/favicon.svg';
 	import '../app.css';
+	export const prerender = true;
 </script>
 
 <slot/>
