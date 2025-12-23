@@ -10,7 +10,9 @@
   let discordUserState: string | null = null;
   onMount(async () => {
     try {
-      const response = await fetch(`https://api.lanyard.rest/v1/users/1250607214180438016`);
+      const response = await fetch(
+        `https://api.lanyard.rest/v1/users/1250607214180438016`,
+      );
       const data = await response.json();
 
       discordUserState = data.data.activities[0]?.state;
