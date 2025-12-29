@@ -17,21 +17,205 @@
   import resume from "$lib/assets/resume.png";
   import air_pollution from "$lib/assets/air_pollution.png";
   import water_pollution from "$lib/assets/water_pollution.png";
+  import crows_at_duskfall from "$lib/assets/Crows at Duskfall.mp3";
+  import film_soundtrack from "$lib/assets/Flim Soundtrack.mp3";
+  import for_my_own_sake from "$lib/assets/For My Own Sake.mp3";
+  import garageband_blues from "$lib/assets/GarageBand Blues.mp3";
+  import garageille_o_neal from "$lib/assets/Garageille O_Neal.mp3";
+  import garlic_bread_on_venus from "$lib/assets/Garlic Bread on Venus.mp3";
+  import i_wash_the_sheets from "$lib/assets/I Wash The Sheets.mp3";
+  import lord_of_the_flies_chapter_one from "$lib/assets/lotf chapter 1.mp3";
+  import monotony from "$lib/assets/Monotony.mp3";
+  import no_vows_no_veins from "$lib/assets/No Vows, No Veins.mp3";
+  import pain_shame_memories from "$lib/assets/Pain, Shame, Memories.mp3";
+  import roll_credits from "$lib/assets/credits theme.mp3";
+  import serenade_of_confession from "$lib/assets/Serenade of Confession.mp3";
+  import spirals_and_stars from "$lib/assets/Spirals and Stars.mp3";
+  import the_threads from "$lib/assets/The Threads.mp3";
+  import tungsten_rain from "$lib/assets/Tungsten Rain.mp3";
 
   import { onMount } from "svelte";
 
+  class Particle {
+    x!: number;
+    y!: number;
+    s!: number;
+    spd!: number;
+    off!: number;
+
+    constructor() {
+      const canvas = document.getElementById(
+        "particleCanvas",
+      ) as HTMLCanvasElement | null;
+      if (canvas === null) return;
+
+      this.x = rnd(window.innerWidth);
+      this.y = rnd(document.documentElement.scrollHeight);
+      this.s = flr(rnd(5)); // Size (0 or 1)
+      this.spd = 0.25 + rnd(5); // Speed (between 0.25 and 5.25)
+      this.off = rnd(1); // Offset (for sine movement)
+    }
+
+    update(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void {
+      if (ctx === null || canvas === null) return;
+
+      // Update positions
+      this.x += this.spd;
+      this.y += sin(this.off);
+      this.off += min(0.05, this.spd / 32);
+
+      // Draw the particle
+      ctx.fillStyle = "white";
+      ctx.fillRect(this.x, this.y, this.s, this.s);
+
+      // Reset if the particle goes off-screen
+      if (this.x > canvas.width + 4) {
+        this.x = -4;
+        this.y = rnd(canvas.height);
+      }
+    }
+  }
+
+  function rnd(max: number): number {
+    return Math.random() * max;
+  }
+
+  function flr(val: number): number {
+    return Math.floor(val);
+  }
+
+  function min(a: number, b: number): number {
+    return a < b ? a : b;
+  }
+
+  function sin(value: number): number {
+    return Math.sin(value);
+  }
+
   let discordUserState: string | null = null;
+  let song = "none";
+
   onMount(async () => {
+    // Fetch user data from API
     try {
       const response = await fetch(
         `https://api.lanyard.rest/v1/users/1250607214180438016`,
       );
       const data = await response.json();
-
       discordUserState = data.data.activities[0]?.state;
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
+
+    // Canvas setup
+    const canvas = document.getElementById(
+      "particleCanvas",
+    ) as HTMLCanvasElement | null;
+
+    if (canvas !== null) {
+      const ctx = canvas.getContext("2d");
+      const particles: Particle[] = [];
+
+      // Resize the canvas to fill the window
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = document.documentElement.scrollHeight;
+      };
+
+      resizeCanvas(); // Set initial size
+      let previousHeight = document.documentElement.scrollHeight;
+
+      particles.length = 0;
+      for (let i = 0; i < Math.floor(canvas.height / 12); i++) {
+        particles.push(new Particle());
+      }
+
+      if (ctx !== null) {
+        function animate(): void {
+          if (canvas === null || ctx === null) return;
+          if (document.documentElement.scrollHeight !== previousHeight) {
+            resizeCanvas();
+            previousHeight = document.documentElement.scrollHeight;
+          }
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          for (let p of particles) {
+            p.update(ctx, canvas);
+          }
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      }
+    }
+
+    const playlist = [
+      crows_at_duskfall,
+      film_soundtrack,
+      for_my_own_sake,
+      garageband_blues,
+      garageille_o_neal,
+      garlic_bread_on_venus,
+      i_wash_the_sheets,
+      lord_of_the_flies_chapter_one,
+      monotony,
+      no_vows_no_veins,
+      pain_shame_memories,
+      roll_credits,
+      serenade_of_confession,
+      spirals_and_stars,
+      the_threads,
+      tungsten_rain,
+    ];
+    let currentTrackIndex = 0;
+    const audioPlayer = document.getElementById(
+      "myAudioPlayer",
+    ) as HTMLAudioElement | null;
+
+    function playCurrentTrack() {
+      if (audioPlayer === null) return;
+      audioPlayer.src = playlist[currentTrackIndex];
+      audioPlayer.addEventListener("play", function () {
+        if (currentTrackIndex == 0) {
+          song = "Crows at Duskfall";
+        }
+      });
+      const playPromise = audioPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise;
+      }
+    }
+
+    function playNext() {
+      currentTrackIndex++;
+      if (currentTrackIndex >= playlist.length) {
+        currentTrackIndex = 0;
+      }
+      if (currentTrackIndex == 0) song = "Crows at Duskfall";
+      if (currentTrackIndex == 1) song = "Film Soundtrack";
+      if (currentTrackIndex == 2) song = "For My Own Sake";
+      if (currentTrackIndex == 3) song = "GarageBand Blues";
+      if (currentTrackIndex == 4) song = "Garageille O'Neal";
+      if (currentTrackIndex == 5) song = "Garlic Bread on Venus";
+      if (currentTrackIndex == 6) song = "I Wash the Sheets";
+      if (currentTrackIndex == 7) song = "Lord of the Flies: Chapter 1";
+      if (currentTrackIndex == 8) song = "Monotony";
+      if (currentTrackIndex == 9) song = "No Vows, No Veins";
+      if (currentTrackIndex == 10) song = "Pain, Shame, Memories";
+      if (currentTrackIndex == 11) song = "Roll Credits";
+      if (currentTrackIndex == 12) song = "Serenade of Confession";
+      if (currentTrackIndex == 13) song = "Spirals and Stars";
+      if (currentTrackIndex == 14) song = "The Threads";
+      if (currentTrackIndex == 15) song = "Tungsten Rain";
+
+      playCurrentTrack();
+    }
+
+    if (audioPlayer !== null) {
+      audioPlayer.addEventListener("ended", playNext);
+    }
+
+    playCurrentTrack();
   });
 
   let a1 = 0;
@@ -60,18 +244,10 @@
   function toggle(id: string, counterid: string, front: boolean) {
     const fn_id = document.getElementById(id);
     const fn_counterid = document.getElementById(counterid);
-    if (
-      fn_id === null ||
-      fn_counterid === null
-    )
-      return;
+    if (fn_id === null || fn_counterid === null) return;
     const dfn_id = document.getElementById(fn_id.id + "d");
     const dfn_counterid = document.getElementById(fn_counterid.id + "d");
-    if (
-      dfn_id === null ||
-      dfn_counterid === null
-      ) 
-      return;
+    if (dfn_id === null || dfn_counterid === null) return;
     fn_id.style.filter = "brightness(120%)";
     dfn_id.style.display = "block";
     dfn_counterid.style.display = "none";
@@ -81,8 +257,7 @@
         fn_counterid.style.filter = "brightness(100%)";
         j = 0;
       }
-    }
-    else {
+    } else {
       j = 1;
       if (i === 1) {
         fn_counterid.style.filter = "brightness(100%)";
@@ -281,6 +456,8 @@
   }
 </script>
 
+<canvas id="particleCanvas"></canvas>
+
 <h1 class="text-white font-mono font-semibold text-3xl mt-1.5 mb-1.5">
   Vikas Banerjee Murthy
 </h1>
@@ -293,35 +470,44 @@
 p-1 m-3 bg-aroace-dark-blue"
 >
   <div
-    class="inline-flex m-2 border-5 border-aroace-yellow rounded-full
-    w-35 h-35 transition-[width, height] duration-750 ease-in-out
-    shrink-0 overflow-hidden hover:w-65 hover:h-65"
+    class="m-2 border-5 border-aroace-yellow rounded-full
+    w-55 h-55 transition-[width, height] duration-750 ease-in-out
+    shrink-0 overflow-hidden hover:w-90 hover:h-90"
     role="tooltip"
     id="file_480"
   >
     <img class="block object-cover" src={file_480} alt="" />
   </div>
   <div
-    class="inline-flex flex-wrap justify-start content-around items-normal
+    class="inline-flex flex-wrap flex-column justify-around content-start
     h-auto w-auto text-aroace-dark-blue font-mono text-xs m-2.5 p-2.5
-   border-5 border-aroace-orange rounded-lg
+    border-5 border-aroace-orange rounded-lg
   bg-aroace-light-blue"
   >
-    <em>Vikas [also mr_lemoncello and Noa Ellis] - they/them</em>
-    <p>
-      I like lots of stuff, but I'm too lazy to write it all here. Here's a few
-      for your troubles: poetry/writing, filmmaking, music, biking.
+    <p class="inline-flex">
+      <em>Vikas [also mr_lemoncello and Noa Ellis] - they/them</em>
     </p>
-    <p>English, ein bisschen Deutsch, 一点普通话&nbsp;</p>
-    <p>:3</p>
+    <p>
+      English, ein bisschen Deutsch, 一点普通话.<br />
+      I like lots of stuff, but I'm too lazy to write it all here. Here's a few for
+      your troubles: poetry/writing, filmmaking, music, biking.
+    </p>
+    <span class="inline-flex mb-1">some music :3&nbsp;</span><audio
+      controls
+      id="myAudioPlayer"
+      autoplay
+      class="h-auto w-full shadow-[0px_0px_25px_3px_rgba(255,0,128,0.8)]"
+    >
+      Your browser does not support the audio element.
+    </audio>
   </div>
 </div>
 <div
-  class="inline-flex flex-row gap-1 justify-between content-stretch w-auto h-auto
+  class="inline-flex flex-row flex-wrap gap-1 justify-between content-stretch w-auto h-auto
  border-5 border-aroace-dark-blue rounded-lg p-1 m-3 bg-aroace-dark-blue"
 >
   <my-button
-    class="inline-flex justify-center content-center m-6 pl-8 pr-8 pt-2 pb-2
+    class="inline-flex justify-center content-center m-3 pl-8 pr-8 pt-2 pb-2
      border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
     role="button"
@@ -342,7 +528,7 @@ p-1 m-3 bg-aroace-dark-blue"
     </div>
   </my-button>
   <my-button
-    class="inline-flex justify-center content-center m-6 pl-8 pr-8 pt-2 pb-2
+    class="inline-flex justify-center content-center m-3 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
     role="button"
@@ -388,7 +574,7 @@ p-1 m-3 bg-aroace-dark-blue"
     </span>
   </div>
   <br /><br />
-  
+
   <p class="text-white font-mono text-xl mb-0">Book 1</p>
   <div
     class="inline-flex flex-row gap-1 justify-start content-center w-auto h-auto
@@ -708,7 +894,7 @@ p-1 m-3 bg-aroace-dark-blue"
       <br /><br />
     </div>
   </div>
-<br /><br />
+  <br /><br />
   <p class="text-white font-mono text-xl mb-0">Book 6</p>
   <div
     class="inline-flex flex-row gap-1 justify-start content-center w-auto h-auto
@@ -772,18 +958,18 @@ p-1 m-3 bg-aroace-dark-blue"
       <br /><br />
     </div>
   </div>
-<br /><br />
+  <br /><br />
 </div>
 
 <h2 class="text-white font-mono mt-3">Creative Endeavors</h2>
 
 <div
-  class="inline-flex flex-row gap-1 justify-between content-stretch w-auto h-auto
+  class="inline-flex flex-wrap flex-row gap-1 justify-between content-stretch w-auto h-auto
  border-5 border-aroace-dark-blue rounded-lg
 p-1 m-3 bg-aroace-dark-blue"
 >
   <my-button
-    class="inline-flex justify-center content-center m-6 pl-8 pr-8 pt-2 pb-2
+    class="inline-flex justify-center content-center m-3 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
     role="button"
@@ -804,7 +990,7 @@ p-1 m-3 bg-aroace-dark-blue"
     </div>
   </my-button>
   <my-button
-    class="inline-flex justify-center content-center m-6 pl-8 pr-8 pt-2 pb-2
+    class="inline-flex justify-center content-center m-3 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
     role="button"
@@ -825,7 +1011,7 @@ p-1 m-3 bg-aroace-dark-blue"
     </div>
   </my-button>
   <my-button
-    class="inline-flex justify-center content-center m-6 pl-8 pr-8 pt-2 pb-2
+    class="inline-flex justify-center content-center m-3 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
     role="button"
@@ -1725,11 +1911,453 @@ p-1 m-3 bg-aroace-dark-blue"
       &nbsp;Animal Farm and Nineteen Eighty-Four on Authoritarianism - 2 Apr
       2025
     </summary>
-    <p class="text-white font-mono text-sm indent-8 mb-0">text</p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      George Orwell (born Eric Arthur Blair June 25th, 1903) was an English
+      writer whose works include novels, poems, essays, journalism, prose, and
+      social criticism. He is best known for the allegorical fable-novella
+      Animal Farm (1945) and the dystopian novel Nineteen Eighty-Four (1949).<sup
+        >1,2</sup
+      >
+      In 1984, Nineteen Eighty-Four won the Prometheus Award for its contributions
+      to dystopian literature along with Ray Bradbury’s Fahrenheit 451, and in 2011,
+      Animal Farm won. In 2003, Nineteen Eighty-Four was listed at number 8 and Animal
+      Farm at number 46 on the BBC’s The Big Read poll, and in 2008, The Times ranked
+      George Orwell as the second-best British writer since 1945.<sup>3,4</sup> In
+      both Animal Farm and Nineteen Eighty-Four, George Orwell critiques authoritarianism’s
+      manipulation of truth and disintegration of freedom with a clear warning that
+      continues to remain relevant.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 m-0 pt-0">
+      Both pieces are critical of authoritarian regimes and written in response
+      to events recent at the time. Animal Farm is critical of communism and
+      written in response to the rise of the Soviet Union; Nineteen Eighty-Four
+      is critical of totalitarian regimes and written in response to growing
+      totalitarian governments in Nazi Germany and Stalin’s Russia.<sup>5</sup>
+      In Animal Farm, Orwell satirizes Russian Communism as it developed under Stalin
+      through phrases like “In future all questions relating to the working of the
+      farm would be settled by a special committee of pigs, presided over by himself.
+      These would meet in private and afterwards communicate their decisions to the
+      others,” showing how communism both in Animal Farm and in Russia adapted to
+      be so different from its stated purpose that it ended up largely similar to
+      the very regime it intended to establish,<sup>6</sup> and “four legs good,
+      two legs bad,” showing the sheer ignorance and complacency of the public
+      for believing in the regime.<sup>7</sup>
+      Both Animal Farm and Nineteen Eighty-Four emerged as direct responses to the
+      events of his time. Animal Farm was published in 1945, at a time when the Soviet
+      Union was emerging as a global superpower, and its portrayal of the corrupting
+      influence of power was a pointed critique of the rise of Joseph Stalin. The
+      novel symbolizes the Russian Revolution and the eventual betrayal of its ideals.
+      Initially, the desire for equality and freedom drives the animals to revolt;
+      however, as the pigs, led by Napoleon, seize control, they gradually betray
+      the original principles of the revolution. Perhaps the most famous phrase from
+      the novella, “There was nothing there now except a single Commandment. It ran:
+      ALL ANIMALS ARE EQUAL BUT SOME ANIMALS ARE MORE EQUAL THAN OTHERS,” is a sharp
+      critique of how the Revolution became indistinguishable from the oppressive
+      systems it sought to overthrow.<sup>8</sup>
+    </p>
+    <p class="text-white font-mono text-sm indent-8 m-0 pt-0">
+      Nineteen Eighty-Four, published four years later in 1949, takes Orwell’s
+      critique of authoritarianism to a darker extreme. Nineteen Eighty-Four is
+      more about the dangers of totalitarianism on a broader scale, which Orwell
+      depicted using the fictional society of Oceania, specifically its extreme
+      surveillance and control. The government, known only as the ‘Party’ and
+      led by the mysterious and (reportedly) all-knowing figure of Big Brother,
+      monitors every aspect of citizens’ lives, who has now become synonymous
+      with oppressive surveillance and control in popular culture. The novel
+      explores the ways in which totalitarian governments manipulate not just
+      the material but the very concept of reality as well. As the protagonist,
+      Winston Smith tries to rebel, but he is confronted with the terrifying
+      power of the Party, which is able to redefine truth itself. The novel
+      discussed the rampant psychological manipulation, propaganda, and
+      obliteration of truth characteristic of totalitarian regimes, tactics all
+      in service of a regime that controls not just the actions of its citizens
+      but also their thoughts. The Party’s slogan is “War is Peace, Freedom is
+      Slavery, Ignorance is Strength” and is an ironic and satirical
+      illustration of the ideology of a totalitarian regime.<sup>9</sup>
+      ‘Thoughtcrime,’ the idea that the most dangerous form of rebellion is not physical
+      but mental, is central to the Party’s control. The novel’s plot is based around
+      ‘doublethink,’ the ability to hold two contradictory beliefs at the same time,
+      essential to survival in Nineteen Eighty-Four; one of the quotes illustrating
+      this is “The Ministry of Peace concerns itself with war, the Ministry of Truth
+      with lies, the Ministry of Love with torture and the Ministry of Plenty with
+      starvation. These contradictions are not accidental, nor do they result from
+      ordinary hypocrisy: they are deliberate exercises in doublethink,” and this
+      inversion of truth is inherent in the propaganda set forth by many totalitarian
+      regimes.<sup>10</sup> In the novel, the inversion manifests through the fabricated
+      language of Newspeak, designed to manipulate and limit the scope of thought,
+      making dissent impossible. The focus on language and its ability to control
+      what people think says a great deal about Orwell’s belief in its power.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 m-0 pt-0">
+      What makes Orwell’s work so enduring is not just the historical context in
+      which it was written, but its universality in its themes. Both books speak
+      of the dangers of unchecked power, the manipulation of truth, and the
+      erosion of individual freedoms: freedom of speech and religion, freedom to
+      privacy, and the loss of humanity in general, all concerns that transcend
+      any one time or place. With the advent of mass surveillance technologies
+      and the rise of state-sponsored censorship, the potential for governments
+      to exert total control over their citizens is as present as ever.
+      Globally, authoritarianism is on the rise, as evident by a military-led
+      coup in Myanmar; parliament dismissed in Tunisia; a cabinet reshuffle
+      leading to the second coup in 10 months in Mali; jailing of political
+      opponents in Nicaragua, Iran, and Russia; no-contest elections in Syria,
+      Kazakhstan, and Uzbekistan; power grabs in Sudan, Chad, and Guinea; and
+      the populist and authoritarian tendencies by president of the United
+      States, Donald Trump.<sup>11</sup> The Trump administration plans to
+      accomplish its goals through three methods of control which are
+      illustrated in the writings of Orwell. The first is the decimation of
+      freedom of speech, which Trump has gone about in a variety of ways, one of
+      the most crucial is control of the media. Before taking office, Trump sued
+      ABC and CBS News over coverage he deemed defamatory,<sup>12,13</sup> a
+      tactic not used before by any president and a canary in a coalmine for the
+      future of press freedom in the United States. Trump barred the Associated
+      Press, a pillar of White House coverage for more than a century,<sup
+        >14</sup
+      >
+      from the Oval Office and Air Force One for refusing to use "Gulf of America"
+      instead of "Gulf of Mexico" after he made the change by decree. The third-largest
+      newspaper by circulation in the United States is the Washington Post,<sup
+        >15</sup
+      >
+      which is outright owned by one of Trump’s biggest allies, Jeff Bezos.<sup
+        >16,17</sup
+      >
+      The Washington Post recently removed their editorials,<sup>18</sup>
+      meaning that the writer’s perspectives are no longer represented and the news
+      is left only to what is approved by higher-ups in the organization. Also, after
+      Trump’s inauguration, they changed their slogan from “Democracy Dies in Darkness”
+      to “Riveting Storytelling for All of America,” indicative of their political
+      affiliations.<sup>19</sup> But perhaps Trump’s greatest method of
+      controlling the media is just him talking: his claims of “fake news” have
+      caused large swaths of the public to lose trust in mainstream media, with
+      trust among Republicans in national news organizations plummeted from 70%
+      in 2016 to just 35% in 2021, correlating with Trump's persistent media
+      criticisms,<sup>20</sup>
+      only worsening in his second term.<sup>21</sup>
+      In Animal Farm, one of the propaganda machines of Napoleon’s regime is Squealer,
+      seen in “Squealer spoke so persuasively, and the three dogs who happened to
+      be with him growled so threateningly, that they accepted his explanation without
+      further questions.”<sup>22</sup> The result of this propaganda is obvious:
+      “And yet the animals never gave up hope. Moreover, they never lost, even
+      for an instant, their sense of honour and privilege in being members of
+      Animal Farm. They were still the only farm in the whole county — in all
+      England! — owned and operated by animals….Their hearts swelled with
+      imperishable pride”<sup>23</sup>and “‘Ah, that is different!’ said Boxer.
+      ‘If Comrade Napoleon says it, it must be right… Napoleon is always
+      right.’”<sup>24</sup> In Nineteen Eighty-Four, the Ministry of Truth
+      spreads Party-approved ideas and goes so far as to control the very notion
+      of truth, including Winston Smith’s job at the Ministry of rewriting
+      historical newspapers to align with the Party’s ideals. All three of these
+      scenarios are situations where an institution that spreads the news only
+      prints news that is approved or aligns with the ideals of the ruling party
+      in a way that is able to convince the masses of those ideals in a way they
+      believe to be true. Along with his blatant disregard for the truth,<sup
+        >25</sup
+      >the other way that Trump decimates free speech is by punishing and
+      deporting dissenters. On March 8, 2025, Mahmoud Khalil, a student activist
+      at Colombia University and lead negotiator for the encampment in the 2024
+      Colombia University pro-Palestinian campus occupations, was taken from his
+      home by U.S. Immigration and Customs Enforcement (ICE) agents acting on
+      orders from the State Department. Though Khalil has a green card, is
+      married to a U.S. citizen, and is a lawful permanent resident of the
+      United States, Colombia revoked his student visa, ICE revoked his
+      permanent resident status, and he was transported to LaSalle Detention
+      Center in Jena, Louisiana.<sup>26,27,28</sup>
+      The detention was the first publicly known deportation effort related to pro-Palestine
+      activism under Trump, who has threatened to punish those he says support Hamas
+      or promote antisemitism.<sup>29</sup> On the night of March 8, hours
+      before the detainment of Mahmoud Khalil, ICE knocked on Ranjani
+      Srinivasan’s door for the second time in two days. The week prior, the
+      State Department revoked her student visa for merely attending a
+      pro-Palestine protest, which they deemed to be terrorist sympathizing.
+      Srinivasan was not home, but shortly thereafter, she packed her belongings
+      and fled to Canada.<sup>30</sup> On March 24, a French scientist was
+      denied entry to Houston after U.S. customs officers found messages
+      criticizing President Donald Trump's cuts to science funding on her phone.<sup
+        >31</sup
+      >
+      In Animal Farm, Snowball is exiled from the farm and in Nineteen Eighty-Four,
+      Winston Smith is brutally tortured for months by the Ministry of Love for accepting
+      a book that upon completion, would grant him possibility of entry into the
+      Brotherhood (the principal enemy of the Party). In all of these scenarios,
+      free speech has been denied by making it clear dissent will be prosecuted,
+      granting the leader immense power over his subjects. Under the Trump administration,
+      not just leading a protest but even participating in one or criticizing him
+      in any form is grounds for removal from the U.S. The second method of control
+      that Trump uses to further his goals is the decimation of rule of law. He has
+      issued a few executive orders that pervert the election process, making it
+      easier to vote for him and harder for others through various methods of voter
+      disenfranchisement.<sup>32</sup> Additionally, he has exploited one of the
+      parts of the carefully crafted system of checks and balances meant to keep
+      such a thing from happening (executive orders) to accomplish his goals in
+      all manner of illegality.<sup>33</sup> For example, law firms in the U.S.
+      have been presented with an ultimatum: either conform to his future policy
+      decisions by agreeing not to sue over their unconstitutionality, or lose
+      their resources or ability to exist.<sup>18</sup> In Animal Farm,
+      Snowball, a political opponent, is exiled and then continually scapegoated
+      for months to come, “Our Leader, Comrade Napoleon,” announced Squealer,
+      speaking very slowly and firmly, “has stated categorically… that Snowball
+      was Jones’s agent from the very beginning… yes, and from long before the
+      Rebellion was ever thought of” and the commandments are progressively
+      changed to nearly their opposite. In Nineteen Eighty-Four, there was no
+      rule of law in the first place, only the Ministry of Love and its ruthless
+      torture systems. Again, in all of these scenarios, rule of law has been
+      denied such that the only laws that exist (or at least the most powerful
+      ones) are the ones put in place by the leader and the leader alone,
+      granting him even more power. The final method of control that Trump uses
+      to accomplish his goals is control of financials. Trump has many of the
+      wealthiest people and organizations in the United States funding him,
+      including Timothy Mellon, Richard & Elizabeth A. Uihlien, Sheldon G. &
+      Miriam O. Adelson, and Elon Musk, among others, who donated nearly a
+      billion dollars to his campaign.<sup>34</sup> Additionally, he, through the
+      first method of control, has the money of the American taxpayer behind him,
+      and those alone combined make him one of the most powerful people on the planet,
+      not to mention he also is the President of the United States of America. Animal
+      Farm’s equivalent to currency is the manipulation of resources and privileges.
+      Napoleon controls the resources on the farm by selectively distributing them
+      to maintain loyalty and power, especially through the manipulation of food
+      and supplies to ensure the animals remain subservient. In Nineteen Eighty-Four,
+      the Party controls the economy through the Ministry of Plenty, which regulates
+      all production and allocation, ensuring that citizens are always in a state
+      of need and dependent on the Party for their survival. The Party’s ability
+      to control financials and basic goods ensures a constant cycle of poverty and
+      subjugation. In all of these scenarios, the leader has managed to gain control
+      over financials, granting him an obscene amount of power on its own, not to
+      mention the other two methods of control, making him an individual unmatched
+      in power. Through these three methods of control, our freedoms are being systematically
+      decimated at a breakneck pace just like the freedoms of the masses of Animal
+      Farm and Nineteen Eighty-Four. George Orwell’s works are a warning from the
+      past. He saw what was happening in his time for what it was and sought to give
+      future generations the tools such that it wouldn’t happen again, and by understanding
+      the writings, we can extrapolate a solution to combating the methods of control.
+      In times where authoritarianism is on the rise, before it can become irreversible,
+      we should recognize the tactics used by such regimes and how they can slowly
+      creep into everyday life. Orwell’s writing warns us of the ways in which propaganda
+      distorts the truth and how critical it is to defend objective facts in the
+      face of manipulation. His works emphasize the importance of independent institutions,
+      like the press, the judiciary, and civil society, that must remain free from
+      the control of any single individual or party. Preserving our democracy requires
+      more than just fighting against Trump; additionally, it requires fighting for
+      the systems that help to support it, the very ones Trump has been going after.
+      The effort demands constant vigilance against the gradual erosion of freedoms.
+      Ultimately, Orwell shows us that even in the face of overwhelming power, the
+      collective strength of mind and voice, if both committed to truth and justice,
+      can resist the tactics to remove freedoms, protect the tenets of democracy,
+      and ultimately fight against the spread of authoritarianism. Only through vigilant
+      defense of our rights can we prevent history from repeating itself.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 m-0 pt-0">
+      The legacy of George Orwell is one of political insight and moral clarity.
+      Through his depiction of communist regimes in Animal Farm and totalitarian
+      ones in Nineteen Eighty-Four, Orwell not just explored the nature of power
+      and the manipulation of reality but gave a clear warning about the
+      consequences of unchecked authority that will continue to persist for the
+      foreseeable future. As long as the corrupting influence of power continues
+      to develop dictatorship and authoritarianism in the world, Animal Farm and
+      Nineteen Eighty-Four will remain relevant in the fight for democracy,
+      truth, and freedom. Make Orwell fiction again!
+    </p>
     <hr />
     <p class="text-white font-mono text-sm m-0 pt-0">
-      <sup>1. text</sup>
+      <sup
+        >1. Blair, Eric Arthur (George Orwell). Animal Farm. 1945. 75th An.,
+        Penguin Random House, 2020.</sup
+      >
     </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>2. ---. Nineteen Eighty-Four. Secker and Warburg, 1949.</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >3. Times. “The 50 Greatest British Writers Since 1945.” The Times, 3
+        Apr. 2010,
+        www.thetimes.com/article/the-50-greatest-british-writers-since-1945-ws3g69xrf90.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >4. BBC - The Big Read - Top 100 Books.
+        www.bbc.co.uk/arts/bigread/top100.shtml.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >5. PBS: Think Tank: Transcript for “Orwell’S Century.”
+        www.pbs.org/thinktank/transcript990.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>6. Orwell 28 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>7. Orwell 17 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>8. Orwell 68 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>9. Orwell Part One, Chapter 1 (6) (Nineteen Eighty-Four)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>10. Orwell Part Two, Chapter 9 (7) (Nineteen Eighty-Four)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >11. Freedom House. “The Global Expansion of Authoritarian Rule.”
+        Freedom House,
+        freedomhouse.org/report/freedom-world/2022/global-expansion-authoritarian-rule.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >12. “Trump Sues CBS News Over 60 Minutes Interview With Harris; Network
+        Says Suit Is ‘Completely Without Merit.’” CBS News, 1 Nov. 2024,
+        www.cbsnews.com/news/trump-sues-cbs-news-60-minutes-interview.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >13. Grynbaum, Michael M., and Jim Rutenberg. “Trump Sues ABC and
+        Stephanopoulos, Saying They Defamed Him.” The New York Times, 18 Mar.
+        2024,
+        www.nytimes.com/2024/03/18/us/politics/trump-lawsuit-abc-stephanopoulos.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >14. Kellman, Laurie. “What to Know About How the White House Press
+        Corps Works | AP News.” AP News, 12 Feb. 2025,
+        apnews.com/article/trump-gulf-mexico-america-ap-first-amendment-4304433d73ad496f5308c9666cbe8e11.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >15. Majid, Aisha. “Top 25 US Newspaper Circulations: Largest Print
+        Titles Fall 14% in Year to March 2023.” Press Gazette, 30 June 2023,
+        pressgazette.co.uk/media-audience-and-business-data/media_metrics/top-25-us-newspaper-circulations-down-march-2023.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >16. Rosenblatt, Lauren. “Once Dubbed a Woke Billionaire, Jeff Bezos
+        Changes His Tune on Trump.” The Seattle Times, 17 Jan. 2025,
+        www.seattletimes.com/business/amazon/once-dubbed-a-woke-billionaire-jeff-bezos-changes-his-tune-on-trump.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >17. “Amazon Boss Jeff Bezos Buys Washington Post for $250m.” BBC News,
+        6 Aug. 2013, www.bbc.com/news/av/business-23582797.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >18. Folkenflik, David. “Bezos’ Changes at ‘Washington Post’ Lead to
+        Mass Subscription Cancellations — Again.” NPR, 28 Feb. 2025,
+        www.npr.org/2025/02/28/nx-s1-5312819/washington-post-bezos-subscriptions-cancellations.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >19. Mullin, Benjamin. “The Washington Post’s New Mission: Reach ‘All of
+        America.’” The New York Times, 16 Jan. 2025,
+        www.nytimes.com/2025/01/16/business/media/the-washington-post-new-mission.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >20. Cillizza, Chris. “Here’s Donald Trump’s Most Lasting, Damaging
+        Legacy.” CNN, 30 Aug. 2021,
+        www.cnn.com/2021/08/30/politics/trump-legacy-fake-news/index.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >21. Rutgers University. “How Trump Shaped the Media.” Rutgers
+        University, 20 Jan. 2021, www.rutgers.edu/news/how-trump-shaped-media.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>22. Orwell 30 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>23. Orwell 65 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup>24. Orwell 29 (Animal Farm)</sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >25. Kessler, Glenn. “Trump Made 30,573 False or Misleading Claims as
+        President: Nearly Half Came in His Final Year.” The Washington Post, 23
+        Jan. 2021,
+        www.washingtonpost.com/politics/how-fact-checker-tracked-trump-claims/2021/01/23/ad04b69a-5c1d-11eb-a976-bad6431e03e2_story.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >26. Offenhartz, Jake. “ICE Arrests Palestinian Activist Mahmoud Khalil
+        | AP News.” AP News, 10 Mar. 2025,
+        apnews.com/article/columbia-university-mahmoud-khalil-ice-15014bcbb921f21a9f704d5acdcae7a8.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >27. Iqbal, Nomia. Pro-Palestinian Student Protester Detained by US
+        Immigration Officials, Says Lawyer. 10 Mar. 2025,
+        www.bbc.com/news/articles/c0q1pl1eldno.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >28. Chappell, Bill. “Mahmoud Khalil Case Goes to Court, Spotlighting
+        Green Card Holders’ Rights.” NPR, 12 Mar. 2025,
+        www.npr.org/2025/03/11/nx-s1-5323147/mahmoud-khalil-green-card-rights.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >29. Shalvey, Kevin, et al. “Trump Admin Updates: White House Asks Court
+        to Stay Deportation Flights TRO.” ABC News, 17 Mar. 2025,
+        abcnews.go.com/Politics/live-updates/trump-2nd-term-live-updates-trump-defends-tariff?id=119625202&entryId=119642816.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >30. Ferré-Sadurní, Luis, and Hamed Aleaziz. “How a Columbia Student
+        Fled to Canada After ICE Came Looking for Her.” The New York Times, 15
+        Mar. 2025,
+        www.nytimes.com/2025/03/15/nyregion/columbia-student-kristi-noem-video.html.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >31. Mackey, Robert. “French Scientist Denied US Entry After Phone
+        Messages Critical of Trump Found.” The Guardian, 27 Mar. 2025,
+        www.theguardian.com/us-news/2025/mar/19/trump-musk-french-scientist-detained.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >32. “Tracking the Trump Administration’s Harmful Executive Actions |
+        Congressman Steve Cohen.” Congressman Steve Cohen, 28 Mar. 2025,
+        cohen.house.gov/TrumpAdminTracker.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >33. "Executive Orders.” Federal Register,
+        www.federalregister.gov/presidential-documents/executive-orders/donald-trump/2025</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >34. Kronenberg, Alan. “The Biggest Political Donors of the 2024
+        Election.” US News & World Report, 5 Nov. 2024,
+        www.usnews.com/news/elections/articles/2024-11-05/the-biggest-political-donors-of-the-2024-election.</sup
+      >
+    </p>
+  <br />
   </details>
   <details>
     <summary class="text-white font-mono text-xl mb-0">
@@ -1973,20 +2601,454 @@ p-1 m-3 bg-aroace-dark-blue"
       &nbsp;Emotionally Abusive Parenting and the Societal Structures That
       Sanction It - 11 Nov 2025
     </summary>
-    <p class="text-white font-mono text-sm indent-8 mb-0">text</p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      The maxim: <em
+        >“all children deserve parents, but not all parents deserve children”</em
+      >
+      is not hyperbole. It is a moral warning that exposes a fundamental failure
+      embedded in contemporary social norms: a society that grants adults who
+      have never cultivated emotional maturity near-automatic legitimacy as
+      parents, while offering children with developing minds, vulnerable
+      psyches, and forming identities no comparable protection from the
+      emotional incompetence, negligence, or outright cruelty of those
+      caregivers. Emotional abuse is not an aberration but a predictable outcome
+      of cultural entitlement: the belief and societal pressure that adulthood
+      alone qualifies a person for reproduction and parenthood, regardless of
+      psychological readiness or interest. Societal institutions, from extended
+      families to religious communities to legal systems, expect children to
+      endure whatever emotional volatility adults inflict upon them, while
+      offering those same adults unearned authority and social immunity. This
+      entitlement, combined with a chronic underestimation of the psychological
+      labor required for parenting, creates fertile ground for the cycle of
+      emotional harm to persist, not because abuse is invisible, but because
+      society refuses to call it what it is.<sup>1</sup>
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Emotional abuse in parent-child relationships remains grotesquely
+      normalized. Behaviors that would be condemned between adults are dismissed
+      when inflicted on children, as though youth transforms cruelty into
+      pedagogy. Parents weaponize shame, humiliation, gaslighting, and emotional
+      withdrawal, then justify it as discipline or tradition.<sup>2</sup> The child
+      is blamed for the parent’s outbursts. The parent’s insecurity becomes the child’s
+      burden. Society applauds ‘strictness,’ mistaking control for care. This is
+      not merely a ‘difficult upbringing’ or a ‘parenting style’; it is a form of
+      psychological violence, yet it is often minimized, dismissed, or reframed,
+      and the victims, lacking the language or power to defend themselves, internalize
+      the idea that love is conditional, that security is unstable, that their worth
+      hinges on appeasing an emotionally unpredictable authority. Children subjected
+      to emotional abuse endure constant invalidation and humiliation, often rationalized
+      as ‘toughening them up;’ manipulation, gaslighting, and coercion, treated as
+      normal parental ‘guidance’; fear-based attachment, in which the caregiver is
+      at once the source of sustenance and of psychological harm; and an erasure
+      of emotional autonomy, where expressing needs is punished and suppressing them
+      is rewarded. These behaviors are abusive, full stop, and the fact that they
+      are not universally recognized as such is a testament to society’s collective
+      willingness to prioritize parental comfort over children’s psychological safety.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Children living under emotionally abusive parents are often trapped in an
+      environment where psychological survival becomes their primary
+      developmental task. Childhood for them is not a stage of exploration: it
+      is a stage of survival. Their energy is diverted from growth toward
+      protection. They learn to modulate their behavior not in service of
+      exploring the world, but in service of avoiding parental retaliation. They
+      master hypervigilance instead of curiosity. They understand to mute
+      themselves instead of expressing themselves. The result is pathological
+      hypervigilance as children develop finely tuned instincts to detect shifts
+      in parental mood; stunted emotional development caused by the absence of
+      safe emotional modeling; identity distortion, where the child internalizes
+      the parent’s contempt and comes to believe it is self-generated truth;
+      self-erasure, because visibility invites punishment; and attachment wounds
+      that sabotage psychological stability and emotional literacy, as children
+      oscillate between seeking comfort from and protecting themselves against
+      the same adult, all the while learning that their feelings are
+      unacceptable or irrelevant.<sup>3</sup> These outcomes are not developmental
+      quirks; they are psychological injuries inflicted at an age when children lack
+      any means of self-defense.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      The long-term psychological consequences of emotional abuse constitute a
+      form of delayed devastation, lingering like ghosts. Adults raised in
+      emotionally abusive homes often spend years, if not decades attempting to
+      untangle themselves from beliefs and behaviors installed by immature or
+      malicious caregivers, healing from psychological wounds that did not have
+      to exist: enduring depression, anxiety, and complex trauma in the form of
+      emotional dysregulation, dissociation, and self-blame,<sup>4</sup>
+      extracted directly from parental volatility; chronic self-doubt and
+      self-silencing, remnants of being trained to distrust others and one’s own
+      perceptions, an especially cruel legacy of gaslighting; maladaptive
+      relational patterns, ranging from people-pleasing to avoidance of any
+      loving relationship, shaped by attachment wounds inflicted during
+      formative years;<sup>5</sup> and a damaged sense of self, because they
+      spent their childhoods being told, implicitly or explicitly, that they
+      were not enough.<sup>6,7</sup> They are the predictable consequences of
+      entrusting vulnerable children to caregivers who lack the capacity or the
+      willingness to act with basic emotional responsibility, choosing power
+      over compassion, control over connection.<sup>8</sup>
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      A central driver of emotionally abusive parenting is emotional immaturity:
+      an adult’s inability to regulate their own emotions, empathize with
+      others, or differentiate their personal frustrations from their child’s
+      needs.<sup>9</sup> However, emotional immaturity alone does not explain
+      the scale of the problem. Emotional abuse persists not only because
+      abusive parents exist, but because societal institutions protect them
+      through the culturally sanctioned beliefs that: all adults are inherently
+      fit to parent, reproduction is a social milestone rather than a personal
+      choice, and children exist to fulfill adult desires, expectations, or
+      identities.<sup>10</sup> Emotional abuse flourishes because communities protect
+      parents at the expense of children: ‘respect your parents no matter what’ (translation:
+      accept abuse quietly), ‘all families have problems’ (translation: your pain
+      is ordinary and therefore unimportant), ‘parents know best’ (translation: your
+      perception of mistreatment is invalid), ‘family matters are private’ (translation:
+      stay silent even when you are being abused).
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      One of society’s most insidious failures is the way it dehumanizes
+      children. Children are frequently treated as decorative proof of
+      adulthood, emotional trash bins, blank slates on which parents project
+      insecurities, or subordinates who must obey without question. Children are
+      people, not dolls to dress up for social approval, not emotional sponges
+      to absorb a parent’s unresolved trauma, not lesser beings who exist to
+      endure ridicule, disrespect, or authoritarian domination. They are people
+      with memory, with dignity, with interior lives that are shaped, sometimes
+      damaged, by every word, every gesture, every silence. Children remember,
+      maybe not every detail, but the emotional reality? They remember all of
+      it.<sup>11</sup>
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      These narratives collectively ensure that abusive parents remain socially
+      insulated while children are forced into complicity. They transform abuse
+      from an individual failing into systemic negligence. In this framework,
+      parenthood becomes a default status conferred by age, biology, or
+      marriage, not by competence, willingness, or emotional preparedness.<sup
+        >12,13</sup
+      >Society offers little scrutiny of adults’ motivations for having
+      children; instead, it glorifies parenthood and stigmatizes those who
+      choose not to reproduce.<sup>14,15</sup> The irony is striking: adults who
+      lack the emotional maturity to question social pressure or examine their
+      motivations often become parents for reasons entirely divorced from
+      readiness: to conform, to appease others, to fill a void, to live a
+      script. Meanwhile, individuals who conscientiously evaluate whether they
+      should become parents; those who resist pressure because they understand
+      the gravity of raising a human being are often the ones most capable of
+      providing care.<sup>16</sup> In this way, the unprepared are systematically
+      elevated and the responsible side-eyed.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      To illustrate what emotionally competent parenting looks like, secure
+      attachment theory provides a clear framework. Secure attachment is defined
+      as a deep, emotional bond where the child feels safe, understood, and
+      valued. It is focused on creating a strong, responsive, and trusting bond
+      with the child, key practices including being physically close, responding
+      sensitively to their cues, and maintaining a predictable and loving
+      environment. According to attachment theory, children who form secure
+      attachments with caregivers develop better emotional regulation, social
+      competence, and resilience.<sup>17</sup> Securely attached children show
+      lower levels of anxiety and depression. They also perform better
+      academically and socially.<sup>18</sup> Incorporating secure attachment into
+      parenting involves consistently meeting the child’s needs for comfort and security
+      while also providing the freedom to explore their world from a secure base,
+      which is done in three ways: responsiveness, consistency in structure, and
+      autonomy-supporting.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Responsive parenting means engaging with children in a consistent,
+      sensitive, and emotionally warm way. This involves being present and
+      empathetic to the child’s feelings and experiences, and responding in a
+      timely, appropriate, and sensitive way to build a strong emotional bond.
+      It involves observing and interpreting body language and then reacting to
+      support their development and emotional well-being.<sup>19</sup> This is
+      synonymous with being emotionally attuned as a parent, and helps children
+      to learn to understand and manage their own emotions. Psychologist John
+      Gottman coined the term “emotion coaching,” where parents validate
+      emotions and guide children in managing them, linked to fewer behavioral
+      problems and better peer relationships.<sup>20</sup> High emotional
+      availability is also linked to secure attachment and resilience. Noticing
+      and appropriately reacting to a child's needs is linked to better language
+      development, emotional intelligence, and problem-solving skills,<sup
+        >21</sup
+      >
+      and it is found that responsiveness predicts improvements in children’s
+      cognitive and social development.<sup>22</sup> Warm communication helps build
+      trust and openness. These parents do not seek to dominate. They seek to connect.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Consistency in structure focuses on establishing clear rules,
+      expectations, and routines, and following through with predictable and
+      fair consequences, which helps children learn to regulate their behavior
+      and develop emotional stability. This doesn’t mean being rigid, but rather
+      being dependable. Children thrive in environments where they know what is
+      expected. Consistency helps reduce anxiety and promotes self-discipline.<sup
+        >23</sup
+      >
+      Baumrind’s research on parenting styles shows that authoritative parenting
+      (high warmth, high structure) is linked with the most positive outcomes in
+      children.<sup>24</sup> Inconsistent discipline is associated with
+      behavioral problems.<sup>25</sup> These parents do not weaponize their authority.
+      They use it to cultivate safety.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Autonomy supportive parenting is a style that balances providing support
+      with allowing children to develop independence, self-worth, and their own
+      decision-making skills within clear boundaries. It values the child’s
+      perspective, encourages independence, and allows age-appropriate choices.
+      Supporting autonomy leads to higher self-esteem, motivation, and identity
+      development.<sup>26,27</sup> Self-Determination Theory emphasizes autonomy
+      as a core psychological need.<sup>28</sup> It has been found that
+      autonomy-supportive parenting predicts higher academic performance and
+      emotional well-being.<sup>29</sup> These parents do not insist on obedience.
+      They encourage autonomy grounded in trust.
+    </p>
+    <p class="text-white font-mono text-sm indent-8 mb-0">
+      Emotional abuse in parent-child relationships is not an inevitable
+      byproduct of imperfect humanity: it is the outcome of a culture that
+      grants adults unconditional authority and children conditional worth.
+      Parenthood requires emotional regulation, empathy, introspection, and
+      humility, but many parents never develop them, and yet, society treats
+      parenthood as an unexamined expectation rather than a profound
+      psychological responsibility.<sup>30</sup> The abuse is preventable, but preventing
+      it requires dismantling the myth of parental entitlement, rejecting cultural
+      norms that trivialize children’s suffering, and insisting that emotional maturity,
+      not biology, not tradition, not social pressure, is the baseline requirement
+      for raising a child. Until then, the cycle of harm will continue, leaving countless
+      individuals to repair the damage inflicted by adults who should never have
+      been entrusted with the responsibility of shaping a developing mind. Not all
+      parents deserve children, and a society that refuses to acknowledge this truth
+      is complicit in the harm that follows.
+    </p>
     <hr />
     <p class="text-white font-mono text-sm m-0 pt-0">
-      <sup>1. text</sup>
+      <sup
+        >1. American Academy of Pediatrics. “Psychological Maltreatment.”
+        Pediatrics, vol. 130, no. 2, 2012, pp. 372–378,
+        publications.aap.org/pediatrics/article/130/2/372/29936.</sup
+      >
     </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >2. Verywell Family. “What Is Emotional Child Abuse?” Verywell Family,
+        www.verywellfamily.com/what-is-emotional-child-abuse-4157502.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >3. Verywell Health. “Can You Get PTSD from Emotional Abuse?” Verywell
+        Health, www.verywellhealth.com/ptsd-from-emotional-abuse-5210626.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >4. Wright, Margaret O'Dougherty et al. “Childhood emotional
+        maltreatment and later psychological distress among college students:
+        the mediating role of maladaptive schemas.” Child abuse & neglect vol.
+        33,1 (2009): 59-68. doi:10.1016/j.chiabu.2008.12.007</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >5. Șițoiu, A., & Pânișoară, G. (2022). Emotional Regulation in Parental
+        Optimism—The Influence of Parenting Style. Sustainability, 14(8), 4509.
+        https://doi.org/10.3390/su14084509</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >6. Tarabulsy, George M., et al. “Footprints from Childhood: Intra-
+        versus Extra-Familial Childhood Maltreatment and Its Association to
+        Adult Attachment Organization.” BMC Psychology, vol. 13, 2025,
+        bmcpsychology.biomedcentral.com/articles/10.1186/s40359-025-03001-7.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >7. De Boer, Arianne, et al. “Long-Term Emotional Consequences of
+        Parental Alienation Exposure in Children: A Systematic Review.” =, 2021,
+        link.springer.com/article/10.1007/s12144-021-02537-2.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >8. WenLi, Zhang et al. “Parenting styles and externalizing problem
+        behaviors of preschoolers: mediation through self-control abilities and
+        emotional management skills.” Frontiers in psychology vol. 16 1433262. 5
+        Feb. 2025, doi:10.3389/fpsyg.2025.1433262</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >9. Kim, Geun Young, et al. “Relationship between Mother’s Emotional
+        Intelligence, Negative Parenting Behaviour, and Children’s Attachment
+        Instability.” BMC Public Health, vol. 22, 2022,
+        bmcpublichealth.biomedcentral.com/articles/10.1186/s12889-022-13171-3.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >10. Cao, Yiwen, and Kathryn Maguire-Jack. “Interactions with Community
+        and Institutions: Preventive Pathways for Child Maltreatment.” Child
+        Abuse & Neglect, vol. 62, 2016, pp. 111–121. PubMed Central,
+        pmc.ncbi.nlm.nih.gov/articles/PMC5472093.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >11. Nanda, Sarannya. “The Impact of Parenting Styles on Emotion
+        Regulation in Children.” International Journal for Multidisciplinary
+        Research (IJFMR), 2025, www.ijfmr.com/papers/2025/3/49802.pdf.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >12. Frontini, A., et al. “What Do We Need Kids For? Childbearing
+        Motivations, Personal Values, and Socio-demographic Differences.”
+        Frontiers in Psychology, 2025, doi:10.3389/fpsyg.2025.1612384.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >13. BMC Women’s Health. “Reflections on Timing of Motherhood – a
+        Qualitative Online Study with Women of Reproductive Age.” BMC Women’s
+        Health, 2024,
+        bmcwomenshealth.biomedcentral.com/articles/10.1186/s12905-024-03409-0.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >14. Foti, Federica, et al. “The Importance of Motherhood: Cultural
+        Norms, Stigma, and Reproduction in Pronatalist Societies.” Frontiers in
+        Public Health, vol. 11, 2023, doi:10.3389/fpubh.2023.1024438.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >15. McKendree University Scholars. “Voluntary Childlessness: Stigma and
+        Societal Pressures on Men and Women.” McKendree University, 2019,
+        www.mckendree.edu/academics/scholars/reining-issue-29.pdf.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >16. Özgür, Gülşah, and Emine Yesil. “Womanhood Bound to Motherhood:
+        Choosing Childlessness in Türkiye.” BMC Psychology, vol. 13, 2025,
+        bmcpsychology.biomedcentral.com/articles/10.1186/s40359-025-02661-9.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >17. Bowlby, John. Attachment and Loss, Vol. 1: Attachment. Basic Books,
+        1969.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >18. Ainsworth, M. D. S., Blehar, M. C., Waters, E., & Wall, S. N.
+        Patterns of Attachment: A Psychological Study of the Strange Situation.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >19. Martínez, Paulina, and Andrea Muñoz. “Empathy and Parental
+        Sensitivity in Child Attachment: A Systematic Review.” Children, vol.
+        12, no. 4, 2025, www.mdpi.com/2227-9067/12/4/465</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >20. Gottman, J. M., & DeClaire, J. (1997). Raising an Emotionally
+        Intelligent Child: The Heart of Parenting. New York: Simon & Schuster.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >21. Ferreira, Carolina, et al. “Emotional Competence, Attachment, and
+        Parenting Styles in Children and Parents.” Psicologia: Reflexão e
+        Crítica, vol. 35, 2022,
+        prc.springeropen.com/articles/10.1186/s41155-022-00208-0.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >22. Ren, Xiaoran, et al. “Parenting Pathways to Friendship: How
+        Self-Control and Emotion Management Skills Mediate Preschoolers’ Social
+        Lives in China.” BMC Psychology, vol. 13, 2025,
+        bmcpsychology.biomedcentral.com/articles/10.1186/s40359-025-02641-z.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >23. Wang, Ruiping. “The Effects of Parent-Child Attachment Style and
+        Parenting Style on Children’s Emotional Competence.” Journal of
+        Education, Humanities and Social Sciences, vol. 4, 2023,
+        drpress.org/ojs/index.php/EHSS/article/view/17828.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >24. Baumrind, D. (1967). Child care practices anteceding three patterns
+        of preschool behavior. Genetic Psychology Monographs, 75(1), 43–88.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >25. Ganesan, Prachi. “The Impact of Parenting Styles on a Child’s
+        Emotional Quotient (EQ).” International Journal of Indian Psychology,
+        vol. 9, no. 4, ijip.in/articles/childs-emotional-quotient-eq. Accessed
+        18 Nov. 2025.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >26. Khan, Jamil, et al. “Impact of Parental Styles on Emotional
+        Intelligence, Academic Achievement, and Self-Esteem of University
+        Students in South Punjab, Pakistan.” Journal of Policy Research, vol.
+        10, no. 3, 2025, pp. 77–82,
+        jprpk.com/index.php/jpr/article/download/629/867/1747.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >27. Masood, Faiza, and Muhammad Farhan Raza. “Psychological
+        Maltreatment and Its Relationship with Self-Esteem and Psychological
+        Stress among Adolescents in Tanzania: A Community-Based, Cross-Sectional
+        Study.” BMC Psychiatry, vol. 19, 2019,
+        bmcpsychiatry.biomedcentral.com/articles/10.1186/s12888-019-2139-y.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >28. Ryan, Richard M., and Edward L. Deci. "Self-Determination Theory
+        and the Facilitation of Intrinsic Motivation, Social Development, and
+        Well-Being." American Psychologist, vol. 55, no. 1, 2000, pp. 68–78.
+      </sup>
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >29. Alexander, Ammu E., and Padmakumari Indu. “Impact of Parental
+        Over-Protection on Emotional Intelligence in Young Adults.” Indian
+        Journal of Psychological Science, 2023,
+        www.napsindia.org/wp-content/uploads/2023/06/9-Impact-Of-Parental-Over-Protection-On-Emotional-Intelligence-In-Young-Ammu-E-Alexander-Dr.Padmakumari-Indu-D-Padavan.pdf.</sup
+      >
+    </p>
+    <p class="text-white font-mono text-sm m-0 pt-0">
+      <sup
+        >30. Morris, Amanda S., et al. “Impact of Parenting on Emotion
+        Regulation During Childhood and Adolescence.” Child Development
+        Perspectives, vol. 11, no. 4, 2017, pp. 233–238. Oxford Academic,
+        doi:10.1111/cdep.12224. (Note: this is a review that discusses how
+        parenting behaviors influence children's emotion regulation.)</sup
+      >
+    </p>
+  <br />
   </details>
 </div>
 
 <h2 class="text-white font-mono mt-3">Contact</h2>
 
 <div
-  class="inline-flex flex-row gap-1 justify-between content-center w-full h-auto
+  class="inline-flex flex-row flex-wrap gap-1 justify-between content-center w-full h-auto
  border-5 border-aroace-dark-blue rounded-lg
-p-1 m-3 bg-aroace-dark-blue"
+p-2 m-3 bg-aroace-dark-blue"
 >
   <span
     class="flex-row content-center text-white font-mono text-xs"
@@ -2041,10 +3103,10 @@ p-1 m-3 bg-aroace-dark-blue"
 
 <div
   id="footer"
-  class="flex flex-row gap-4 fixed bottom-0 w-auto h-auto
-   border-5 border-aroace-dark-blue rounded-lg
-  p-4 m-4 bg-aroace-dark-blue transition-[width, height] duration-500 ease-in-out
-  hover:scale-110"
+  class="inline-flex flex-column fixed bottom-0 w-auto h-auto
+  border-5 border-aroace-dark-blue rounded-lg m-4 p-2
+  bg-aroace-dark-blue transition-[width, height] duration-500 ease-in-out
+  hover:scale-105"
   role="tooltip"
   onmouseover={() => change_color("footer", "#396488")}
   onfocus={() => change_color("footer", "#396488")}
@@ -2061,11 +3123,38 @@ p-1 m-3 bg-aroace-dark-blue"
       vikasarino@gmail.com</a
     >
   </p>
+  <p>
+    <em class="content-normal text-gray-400 font-mono text-sm mb-0"
+      >now playing: {song}</em
+    >
+  </p>
 </div>
 
 <style>
-  :global(body) {
+  :global(body)::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    padding: 0px;
+    height: 100vh;
+    background-image: url("http://localhost:5173/mr-lemoncello.github.io/images/background.jpg");
     background-color: #1c1c1e;
+    filter: brightness(30%) contrast(80%) blur(0.8px);
+    object-fit: cover;
+    position: center;
+  }
+  :global(body) {
     margin: 40px;
+  }
+
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    min-height: 100vh;
   }
 </style>
