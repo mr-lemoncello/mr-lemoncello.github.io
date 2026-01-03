@@ -1,22 +1,22 @@
 <svelte:options customElement="my-element" />
 
 <script lang="ts">
-  import file_480 from "$lib/assets/file_480.png";
-  import poetry1 from "$lib/assets/poetry1.png";
-  import poetry1back from "$lib/assets/poetry1back.png";
-  import poetry2 from "$lib/assets/poetry2.png";
-  import poetry2back from "$lib/assets/poetry2back.png";
-  import poetry3 from "$lib/assets/poetry3.png";
-  import poetry3back from "$lib/assets/poetry3back.png";
-  import poetry4 from "$lib/assets/poetry4.png";
-  import poetry4back from "$lib/assets/poetry4back.png";
-  import poetry5 from "$lib/assets/poetry5.png";
-  import poetry5back from "$lib/assets/poetry5back.png";
-  import poetry6 from "$lib/assets/poetry6.png";
-  import poetry6back from "$lib/assets/poetry6back.png";
-  import resume from "$lib/assets/resume.png";
-  import air_pollution from "$lib/assets/air_pollution.png";
-  import water_pollution from "$lib/assets/water_pollution.png";
+  import file_480 from "$lib/assets/file_480.webp";
+  import poetry1 from "$lib/assets/poetry1.webp";
+  import poetry1back from "$lib/assets/poetry1back.webp";
+  import poetry2 from "$lib/assets/poetry2.webp";
+  import poetry2back from "$lib/assets/poetry2back.webp";
+  import poetry3 from "$lib/assets/poetry3.webp";
+  import poetry3back from "$lib/assets/poetry3back.webp";
+  import poetry4 from "$lib/assets/poetry4.webp";
+  import poetry4back from "$lib/assets/poetry4back.webp";
+  import poetry5 from "$lib/assets/poetry5.webp";
+  import poetry5back from "$lib/assets/poetry5back.webp";
+  import poetry6 from "$lib/assets/poetry6.webp";
+  import poetry6back from "$lib/assets/poetry6back.webp";
+  import resume from "$lib/assets/resume.webp";
+  import air_pollution from "$lib/assets/air_pollution.webp";
+  import water_pollution from "$lib/assets/water_pollution.webp";
   import blindsided_surveillance from "$lib/assets/blindedsided_surveillance.mp3";
   import crows_at_duskfall from "$lib/assets/Crows at Duskfall.mp3";
   import film_soundtrack from "$lib/assets/Flim Soundtrack.mp3";
@@ -34,27 +34,27 @@
   import spirals_and_stars from "$lib/assets/Spirals and Stars.mp3";
   import the_threads from "$lib/assets/The Threads.mp3";
   import tungsten_rain from "$lib/assets/Tungsten Rain.mp3";
-  import site_l from "$lib/assets/site_l.png";
-  import site_l2 from "$lib/assets/site_l2.png";
-  import turbidity from "$lib/assets/turbidity.png";
-  import dissolved_oxygen from "$lib/assets/dissolved-oxygen.png";
-  import pH from "$lib/assets/pH.png";
-  import macro1 from "$lib/assets/macroinvertebrate 1.png";
-  import macro2 from "$lib/assets/macroinvertebrate 2.png";
-  import macro3 from "$lib/assets/macroinvertebrate 3.png";
-  import macro4 from "$lib/assets/macroinvertebrate 4.png";
-  import macro5 from "$lib/assets/macroinvertebrate 5.png";
-  import macro6 from "$lib/assets/macroinvertebrate 6.png";
-  import macro7 from "$lib/assets/macroinvertebrate 7.png";
-  import macro8 from "$lib/assets/macroinvertebrate 8.png";
-  import temp_graph from "$lib/assets/temp_graph.png";
-  import turbid_graph from "$lib/assets/turbid_graph.png";
-  import do_graph from "$lib/assets/do_graph.png";
-  import ph_graph from "$lib/assets/ph_graph.png";
-  import biotic_graph from "$lib/assets/biotic_graph.png";
-  import ept_graph from "$lib/assets/ept_graph.png";
-  import id_1 from "$lib/assets/id_1.png";
-  import id_2 from "$lib/assets/id_2.png";
+  import site_l from "$lib/assets/site_l.webp";
+  import site_l2 from "$lib/assets/site_l2.webp";
+  import turbidity from "$lib/assets/turbidity.webp";
+  import dissolved_oxygen from "$lib/assets/dissolved-oxygen.webp";
+  import pH from "$lib/assets/pH.webp";
+  import macro1 from "$lib/assets/macroinvertebrate 1.webp";
+  import macro2 from "$lib/assets/macroinvertebrate 2.webp";
+  import macro3 from "$lib/assets/macroinvertebrate 3.webp";
+  import macro4 from "$lib/assets/macroinvertebrate 4.webp";
+  import macro5 from "$lib/assets/macroinvertebrate 5.webp";
+  import macro6 from "$lib/assets/macroinvertebrate 6.webp";
+  import macro7 from "$lib/assets/macroinvertebrate 7.webp";
+  import macro8 from "$lib/assets/macroinvertebrate 8.webp";
+  import temp_graph from "$lib/assets/temp_graph.webp";
+  import turbid_graph from "$lib/assets/turbid_graph.webp";
+  import do_graph from "$lib/assets/do_graph.webp";
+  import ph_graph from "$lib/assets/ph_graph.webp";
+  import biotic_graph from "$lib/assets/biotic_graph.webp";
+  import ept_graph from "$lib/assets/ept_graph.webp";
+  import id_1 from "$lib/assets/id_1.webp";
+  import id_2 from "$lib/assets/id_2.webp";
 
   import { onMount } from "svelte";
 
@@ -717,6 +717,10 @@
 
 <canvas id="particleCanvas" class="absolute top-0 left-0 w-100% -z-1"></canvas>
 
+<meta
+  name="description"
+  content="Vikas Banerjee Murthy [Noa Ellis]'s personal website, displaying creative projects and the stuff I get up to.">
+
 <div class="relative">
   <p
     id="typewriter-ghost"
@@ -886,6 +890,7 @@
     shrink-0 overflow-hidden hover:w-90 hover:h-90"
       role="tooltip"
       id="file_480"
+      aria-label="Photo of Vikas Banerjee Murthy"
     >
       <img class="block object-cover" src={file_480} alt="" />
     </div>
@@ -2528,6 +2533,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
       height="180"
       src="https://www.youtube.com/embed/S4SFCWFjZcs"
       allow="fullscreen"
+      loading="lazy"
     >
     </iframe>
 
@@ -2569,6 +2575,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
       height="180"
       src="https://www.youtube.com/embed/aNfTetDGJ7g"
       allow="fullscreen"
+      loading="lazy"
     >
     </iframe>
 
@@ -2607,6 +2614,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
       height="180"
       src="https://www.youtube.com/embed/sk3-40_Vvy0"
       allow="fullscreen"
+      loading="lazy"
     >
     </iframe>
 
@@ -2645,6 +2653,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
       height="180"
       src="https://www.youtube.com/embed/e7vN35rVPeI"
       allow="fullscreen"
+      loading="lazy"
     >
     </iframe>
 
@@ -4551,21 +4560,21 @@ bg-[hsl(215.09_46.09%_22.55%)]
     >
       Name:
     </span>
-    <input type="text" bind:value={name} /><br />
+    <input type="text" bind:value={name} aria-label="Name"/><br />
     <span
       class="flex-row content-center text-white font-mono text-xs"
       id="input2"
     >
       Email:
     </span>
-    <input type="text" bind:value={email} /><br />
+    <input type="text" bind:value={email} aria-label="Email"/><br />
     <span
       class="flex-row content-center text-white font-mono text-xs"
       id="input3"
     >
       On 1540?
     </span>
-    <input type="checkbox" id="1540" bind:checked={on1540} /><label
+    <input type="checkbox" id="1540" bind:checked={on1540} aria-label="On 1540?"/><label
       for="On 1540?"
     ></label>
     <span
@@ -4574,7 +4583,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
     >
       Interested in buying?
     </span>
-    <input type="checkbox" bind:checked={isBuyer} /><label
+    <input type="checkbox" bind:checked={isBuyer} aria-label="Interested in buying?"/><label
       for="Interested in buying?"
     ></label>
     <my-button
@@ -4624,6 +4633,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
   transition-[width, height] duration-500 ease-in-out
   hover:scale-105"
   role="tooltip"
+  aria-label="Footer"
   onmouseover={() => change_color("footer", "#396488")}
   onfocus={() => change_color("footer", "#396488")}
   onmouseout={() => change_color("footer", "#1f3554")}
@@ -4651,7 +4661,7 @@ bg-[hsl(215.09_46.09%_22.55%)]
     z-index: -2;
     padding: 0px;
     height: 100vh;
-    background-image: url("http://localhost:5173/mr-lemoncello.github.io/images/background.jpg");
+    background-image: url("http://localhost:5173/mr-lemoncello.github.io/src/lib/assets/background.webp");
     background-color: #1c1c1e;
     filter: brightness(30%) contrast(80%) blur(0.8px);
     object-fit: cover;
