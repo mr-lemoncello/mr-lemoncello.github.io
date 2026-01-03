@@ -40,7 +40,36 @@
 
   import { onMount } from "svelte";
   import { initPage } from "$lib/index";
-  import KolkatasPollutionCrisis from "./Kolkatas Pollution Crisis.svelte";
+
+if (typeof window !== "undefined" && typeof document !== "undefined") {
+  function cacheImages(array: Array<string>) {
+    if (!cacheImages.list) {
+      cacheImages.list = [];
+    }
+
+    var list = cacheImages.list;
+
+    for (var i = 0; i < array.length; i++) {
+      var img = new Image();
+
+      // Using arrow function so that `this` is bound to `img`
+      img.onload = () => {
+        var index = list.indexOf(img);
+        if (index !== -1) {
+          // Remove image from the array once it's loaded
+          list.splice(index, 1);
+        }
+      };
+
+      list.push(img);
+      img.src = array[i];
+    }
+  }
+
+  cacheImages.list = [] as HTMLImageElement[];
+
+  cacheImages([file_480, poetry1, poetry1back, poetry2, poetry2back, poetry3, poetry3back, poetry4, poetry4back, poetry5, poetry5back, poetry6, poetry6back, resume, id_1, id_2]);
+}
 
   export let data;
 
@@ -320,7 +349,7 @@
       id="file_480"
       aria-label="Photo of Vikas Banerjee Murthy"
     >
-      <img class="block object-cover" src={file_480} alt="" loading="lazy" />
+      <img class="block object-cover" src={file_480} alt="" />
     </div>
     <div
       class="inline-flex flex-wrap flex-col justify-around
@@ -1252,8 +1281,8 @@
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   flex-background"
   >
-    <img src={id_1} alt="" width="200" loading="lazy" />
-    <img src={id_2} alt="" width="200" loading="lazy" />
+    <img src={id_1} alt="" width="200" />
+    <img src={id_2} alt="" width="200" />
   </div>
 
   <br /> <br /> <br /> <br />
