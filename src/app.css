@@ -1,11 +1,11 @@
 @import 'tailwindcss';
 
 @theme {
-    --color-aroace-dark-blue: #1b2d48;
-    --color-aroace-light-blue: #5faad7;
-    --color-aroace-yellow: #e7c600;
-    --color-aroace-orange: #e38d00;
-    --custom-grey: #1c1c1e;
+  --color-aroace-dark-blue: #1b2d48;
+  --color-aroace-light-blue: #5faad7;
+  --color-aroace-yellow: #e7c600;
+  --color-aroace-orange: #e38d00;
+  --custom-grey: #1c1c1e;
 }
 
 .not-in-view {
@@ -16,4 +16,60 @@
 .in-view {
   opacity: 1;
   transition: opacity 0.6s ease;
+}
+
+.flex-background {
+  background-color: hsl(215.09, 46.09%, 22.55%);
+  background-image:
+    repeating-linear-gradient(transparent,
+      transparent 50px,
+      rgba(0, 0, 0, 0.12) 50px,
+      rgba(0, 0, 0, 0.12) 53px,
+      transparent 53px,
+      transparent 63px,
+      rgba(0, 0, 0, 0.12) 63px,
+      rgba(0, 0, 0, 0.12) 66px,
+      transparent 66px,
+      transparent 116px,
+      rgba(0, 0, 0, 0.15) 116px,
+      rgba(0, 0, 0, 0.15) 166px,
+      rgba(255, 255, 255, 0.05) 166px,
+      rgba(255, 255, 255, 0.05) 169px,
+      rgba(0, 0, 0, 0.15) 169px,
+      rgba(0, 0, 0, 0.15) 179px,
+      rgba(255, 255, 255, 0.05) 179px,
+      rgba(255, 255, 255, 0.05) 182px,
+      rgba(0, 0, 0, 0.15) 182px,
+      rgba(0, 0, 0, 0.15) 232px,
+      transparent 232px),
+    repeating-linear-gradient(270deg,
+      transparent,
+      transparent 50px,
+      rgba(0, 0, 0, 0.12) 50px,
+      rgba(0, 0, 0, 0.12) 53px,
+      transparent 53px,
+      transparent 63px,
+      rgba(0, 0, 0, 0.12) 63px,
+      rgba(0, 0, 0, 0.12) 66px,
+      transparent 66px,
+      transparent 116px,
+      rgba(0, 0, 0, 0.15) 116px,
+      rgba(0, 0, 0, 0.15) 166px,
+      rgba(255, 255, 255, 0.05) 166px,
+      rgba(255, 255, 255, 0.05) 169px,
+      rgba(0, 0, 0, 0.15) 169px,
+      rgba(0, 0, 0, 0.15) 179px,
+      rgba(255, 255, 255, 0.05) 179px,
+      rgba(255, 255, 255, 0.05) 182px,
+      rgba(0, 0, 0, 0.15) 182px,
+      rgba(0, 0, 0, 0.15) 232px,
+      transparent 232px),
+    repeating-linear-gradient(125deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.06) 2px,
+      rgba(0, 0, 0, 0.06) 3px,
+      transparent 3px,
+      transparent 5px,
+      rgba(0, 0, 0, 0.06) 5px);
 }
