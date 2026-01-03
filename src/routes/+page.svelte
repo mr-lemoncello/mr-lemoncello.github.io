@@ -71,11 +71,11 @@
       ) as HTMLCanvasElement | null;
       if (canvas === null) return;
 
-      this.x = rnd(canvas.width);
-      this.y = rnd(canvas.height);
-      this.s = flr(rnd(5)); // Size (0 or 1)
-      this.spd = 0.25 + rnd(5); // Speed (between 0.25 and 5.25)
-      this.off = rnd(1); // Offset (for sine movement)
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.s = Math.floor(Math.random() * 5); // Size (0 or 1)
+      this.spd = 0.25 + Math.random() * 5; // Speed (between 0.25 and 5.25)
+      this.off = Math.random(); // Offset (for sine movement)
     }
 
     update(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void {
@@ -83,8 +83,8 @@
 
       // Update positions
       this.x += this.spd;
-      this.y += sin(this.off);
-      this.off += min(0.05, this.spd / 32);
+      this.y += Math.sin(this.off);
+      this.off += 0.05 < this.spd / 32 ? 0.05 : this.spd / 32;
 
       // Draw the particle
       ctx.fillStyle = "white";
@@ -93,25 +93,9 @@
       // Reset if the particle goes off-screen
       if (this.x > canvas.width + 4) {
         this.x = -4;
-        this.y = rnd(canvas.height);
+        this.y = Math.random() * canvas.height;
       }
     }
-  }
-
-  function rnd(max: number): number {
-    return Math.random() * max;
-  }
-
-  function flr(val: number): number {
-    return Math.floor(val);
-  }
-
-  function min(a: number, b: number): number {
-    return a < b ? a : b;
-  }
-
-  function sin(value: number): number {
-    return Math.sin(value);
   }
 
   let discordUserState: string | null = null;
@@ -122,7 +106,7 @@
     try {
       const response = await fetch(
         `https://api.lanyard.rest/v1/users/1250607214180438016`,
-    );
+      );
       const data = await response.json();
       discordUserState = data.data.activities[0]?.state;
     } catch (error) {
@@ -136,7 +120,7 @@
 
     if (canvas !== null) {
       const ctx = canvas.getContext("2d");
-  
+
       function resizeCanvas() {
         if (canvas !== null) {
           canvas.width = window.innerWidth;
@@ -144,22 +128,26 @@
         }
       }
 
-      resizeCanvas()
-    
+      resizeCanvas();
+
       let previousScrollHeight = document.body.scrollHeight;
 
       setInterval(() => {
-          if (document.body.scrollHeight !== previousScrollHeight) {
-            console.log("scroll height change")  
-            resizeCanvas()
-            previousScrollHeight = document.body.scrollHeight;
-          }
+        if (document.body.scrollHeight !== previousScrollHeight) {
+          console.log("scroll height change");
+          resizeCanvas();
+          previousScrollHeight = document.body.scrollHeight;
+        }
       }, 200);
-  
+
       const particles: Particle[] = [];
 
       particles.length = 0;
-      for (let i = 0; i < Math.floor((canvas.width * canvas.height) / 14400); i++) {
+      for (
+        let i = 0;
+        i < Math.floor((canvas.width * canvas.height) / 28400);
+        i++
+      ) {
         particles.push(new Particle());
       }
 
@@ -221,7 +209,7 @@
         currentTrackIndex = 0;
       }
       if (currentTrackIndex == 0)
-        song = "Blindsided Surveillance - Vikas Banerjee Murthy"
+        song = "Blindsided Surveillance - Vikas Banerjee Murthy";
       if (currentTrackIndex == 1)
         song = "Crows at Duskfall - Vikas Banerjee Murthy";
       if (currentTrackIndex == 2)
@@ -238,8 +226,7 @@
         song = "I Wash the Sheets - Vikas Banerjee Murthy";
       if (currentTrackIndex == 8)
         song = "Lord of the Flies: Chapter 1 - Vikas Banerjee Murthy";
-      if (currentTrackIndex == 9)
-        song = "Monotony - Vikas Banerjee Murthy";
+      if (currentTrackIndex == 9) song = "Monotony - Vikas Banerjee Murthy";
       if (currentTrackIndex == 10)
         song = "No Vows, No Veins - Vikas Banerjee Murthy";
       if (currentTrackIndex == 11)
@@ -250,8 +237,7 @@
         song = "Serenade of Confession - Vikas Banerjee Murthy";
       if (currentTrackIndex == 14)
         song = "Spirals and Stars - Vikas Banerjee Murthy";
-      if (currentTrackIndex == 15)
-        song = "The Threads - Vikas Banerjee Murthy";
+      if (currentTrackIndex == 15) song = "The Threads - Vikas Banerjee Murthy";
       if (currentTrackIndex == 16)
         song = "Tungsten Rain - Vikas Banerjee Murthy";
 
@@ -263,7 +249,109 @@
     }
 
     playCurrentTrack();
-  })
+
+    const fadeInOnScroll = () => {
+      const sections = document.querySelectorAll(".fade-in-scroll");
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top + 100 < window.innerHeight && rect.bottom > 100) {
+          section.classList.add("in-view");
+          section.classList.remove("not-in-view");
+        } else {
+          section.classList.remove("in-view");
+          section.classList.add("not-in-view");
+        }
+      });
+    };
+
+    window.addEventListener("scroll", fadeInOnScroll);
+
+    const root = document.getElementById("typewriter") as HTMLElement;
+    const ghost = document.getElementById("typewriter-ghost") as HTMLElement;
+
+    const originalNodes = Array.from(ghost.childNodes);
+    root.innerHTML = "";
+    root.classList.add("typewriter-caret");
+
+    type Frame = {
+      node: ChildNode;
+      parent: HTMLElement;
+    };
+
+    const queue: Frame[] = originalNodes.map((node) => ({
+      node,
+      parent: root,
+    }));
+
+    let currentText: Text | null = null;
+    let currentParent: HTMLElement | null = null;
+    let charIndex = 0;
+    let skipped = false;
+
+    const skip = () => {
+      if (skipped) return;
+      skipped = true;
+
+      // Remove the absolute typewriter layer
+      root.remove();
+
+      // Reveal ghost content
+      ghost.classList.remove("invisible");
+    };
+
+    ["click", "keydown", "touchstart"].forEach((evt) =>
+      window.addEventListener(evt, skip, { once: true }),
+    );
+
+    function type(): void {
+      if (skipped) return;
+      if (!currentText && queue.length === 0) {
+        return;
+      }
+
+      if (!currentText) {
+        const frame = queue.shift()!;
+        const node = frame.node;
+
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const clone = el.cloneNode(false) as HTMLElement;
+          frame.parent.appendChild(clone);
+
+          const children = Array.from(el.childNodes).map((child) => ({
+            node: child,
+            parent: clone,
+          }));
+
+          queue.unshift(...children);
+
+          const pause = el.className.includes("pb-[") ? 600 : 0;
+          setTimeout(type, pause);
+          return;
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+          currentText = node as Text;
+          currentParent = frame.parent;
+          charIndex = 0;
+        }
+      }
+
+      if (currentText && currentParent) {
+        const text = currentText.textContent ?? "";
+        if (charIndex < text.length) {
+          currentParent.append(text[charIndex++]);
+        } else {
+          currentText = null;
+          currentParent = null;
+        }
+      }
+
+      setTimeout(type, 25);
+    }
+
+    type();
+  });
 
   let a1 = 0;
   let a2 = 0;
@@ -277,6 +365,17 @@
   let email = "";
   let on1540 = false;
   let isBuyer = false;
+
+  let timeHere: number = 0;
+
+  // returns 0 → night, 1 → noon
+  const getDayFactor = (t: number) => {
+    return (Math.cos((t / 300) * Math.PI + Math.PI) + 1) / 2;
+  };
+
+  const interval = setInterval(() => {
+    timeHere = timeHere + 1;
+  }, 1000);
 
   function change_color(name: string, color: string) {
     const fn_name = document.getElementById(name);
@@ -560,198 +659,340 @@
   }
 </script>
 
+<div
+  class="fixed inset-0 pointer-events-none transition-opacity duration-5000 -z-2"
+  style="
+    background: linear-gradient(
+      to bottom,
+      rgba(54, 147, 235, 0.75),
+      rgba(20, 79, 128, 0.65)
+    );
+    opacity: {0.25 + Math.pow(getDayFactor(timeHere), 1.4) * 0.425};
+  "
+></div>
+
+<div
+  class="fixed inset-0 pointer-events-none transition-opacity duration-5000 -z-2"
+  style="
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(20, 30, 70, 0.7),
+        rgba(0, 0, 0, 0.9)
+      ),
+      radial-gradient(
+        circle at 70% 20%,
+        rgba(180, 210, 255, 0.35),
+        transparent 60%
+      );
+    opacity: {1 - getDayFactor(timeHere)};
+  "
+></div>
+
+<div
+  class="fixed inset-0 pointer-events-none transition-opacity duration-3500 -z-2"
+  style="
+    background: linear-gradient(
+      to top,
+      rgba(255, 140, 90, 0.9),
+      rgba(255, 200, 160, 0.4),
+      transparent 60%
+    );
+    opacity: {0.5 *
+    Math.pow(
+      -4 * (getDayFactor(timeHere) - 0.0975) * (getDayFactor(timeHere) + 0.025),
+      4,
+    )};
+    mix-blend-mode: soft-light;
+  "
+></div>
+
+<div
+  class="fixed inset-0 pointer-events-none transition-opacity duration-3000 -z-2"
+  style="
+    background: rgba(255, 255, 255, 0.25);
+    opacity: {Math.pow(getDayFactor(timeHere), 1.6) * 0.45};
+  "
+></div>
+
 <canvas id="particleCanvas" class="absolute top-0 left-0 w-100% -z-1"></canvas>
 
-<div class="px-[10vw] pt-[6vh] pb-[2vh] font-mono text-white">
-  <p class="text-base md:text-lg leading-relaxed opacity-70 italic">
-    The crow’s caws always deepen,
-  </p>
+<div class="relative">
+  <p
+    id="typewriter-ghost"
+    data-typewriter
+    class="invisible typewriter container px-[10vw] pt-[6vh] pb-[2vh] font-mono text-white"
+  >
+    <span class="block text-base md:text-lg leading-relaxed opacity-70 italic">
+      The crow’s caws always deepen,
+    </span>
 
-  <p class="mt-2 ml-8 text-base md:text-lg leading-relaxed">
-    <span class="font-semibold tracking-wide">Time runs on,</span>
-    but still I smile at every line,
-  </p>
+    <span class="block mt-2 ml-8 text-base md:text-lg leading-relaxed">
+      <span class="font-semibold tracking-wide">Time runs on,</span>
+      but still I smile at every line,
+    </span>
 
-  <p class="mt-2 ml-16 text-base md:text-lg leading-relaxed">
-    They mark the joy I didn’t waste,
-  </p>
+    <span class="block mt-2 ml-16 text-base md:text-lg leading-relaxed">
+      They mark the joy I didn’t waste,
+    </span>
 
-  <p class="mt-2 text-base md:text-lg leading-relaxed opacity-70 italic">
-    The friend who kept my soul in time.
-  </p>
+    <span
+      class="block mt-2 pb-[8vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      The friend who kept my soul in time.
+    </span>
 
-  <div class="h-[8vh]"></div>
+    <span class="block text-base md:text-lg leading-relaxed">
+      I’ve never asked for angels much,
+    </span>
 
-  <p class="text-base md:text-lg leading-relaxed">
-    I’ve never asked for angels much,
-  </p>
+    <span
+      class="block mt-2 ml-8 pb-[4vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      They rarely land, they always fly.
+    </span>
 
-  <p class="mt-2 ml-8 text-base md:text-lg leading-relaxed opacity-70 italic">
-    They rarely land, they always fly.
-  </p>
+    <span class="block text-base md:text-lg leading-relaxed">
+      So goodbye friend, and may you roam free.
+    </span>
 
-  <div class="h-[4vh]"></div>
+    <span
+      class="block mt-2 ml-16 pb-[12vh] text-base md:text-lg leading-relaxed font-semibold tracking-wide"
+    >
+      I no longer need your illuminating sight.
+    </span>
 
-  <p class="text-base md:text-lg leading-relaxed">
-    So goodbye friend, and may you roam free.
+    <span class="block text-base md:text-lg leading-relaxed opacity-70 italic">
+      You couldn’t teach me to fly,
+    </span>
+
+    <span
+      class="block mt-2 ml-8 pb-[12vh] text-xl md:text-2xl font-semibold leading-relaxed"
+    >
+      So I learned to fall.
+    </span>
+
+    <span class="block text-2xl md:text-3xl font-semibold leading-relaxed">
+      I love you,
+    </span>
+
+    <span
+      class="block mt-2 mb-1 ml-8 pb-[6vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      See you in the next life.
+    </span>
+
+    <span class="block text-sm tracking-widest opacity-60">
+      — excerpt from <span class="italic">Feathered Angels in the Dark</span> — Noa
+      Ellis
+    </span>
   </p>
 
   <p
-    class="mt-2 ml-16 text-base md:text-lg leading-relaxed font-semibold tracking-wide"
+    id="typewriter"
+    data-typewriter
+    class="absolute inset-0 container px-[10vw] pt-[6vh] pb-[2vh] font-mono text-white"
   >
-    I no longer need your illuminating sight.
-  </p>
+    <span class="block text-base md:text-lg leading-relaxed opacity-70 italic">
+      The crow’s caws always deepen,
+    </span>
 
-  <div class="h-[12vh]"></div>
+    <span class="block mt-2 ml-8 text-base md:text-lg leading-relaxed">
+      <span class="font-semibold tracking-wide">Time runs on,</span>
+      but still I smile at every line,
+    </span>
 
-  <p class="text-base md:text-lg leading-relaxed opacity-70 italic">
-    You couldn’t teach me to fly,
-  </p>
+    <span class="block mt-2 ml-16 text-base md:text-lg leading-relaxed">
+      They mark the joy I didn’t waste,
+    </span>
 
-  <p class="mt-2 ml-8 text-xl md:text-2xl font-semibold leading-relaxed">
-    So I learned to fall.
-  </p>
+    <span
+      class="block mt-2 pb-[8vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      The friend who kept my soul in time.
+    </span>
 
-  <div class="h-[12vh]"></div>
+    <span class="block text-base md:text-lg leading-relaxed">
+      I’ve never asked for angels much,
+    </span>
 
-  <p class="text-2xl md:text-3xl font-semibold leading-relaxed">I love you,</p>
+    <span
+      class="block mt-2 ml-8 pb-[4vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      They rarely land, they always fly.
+    </span>
 
-  <p
-    class="mt-2 mb-1 ml-8 text-base md:text-lg leading-relaxed opacity-70 italic"
-  >
-    See you in the next life.
-  </p>
+    <span class="block text-base md:text-lg leading-relaxed">
+      So goodbye friend, and may you roam free.
+    </span>
 
-  <div class="h-[6vh]"></div>
+    <span
+      class="block mt-2 ml-16 pb-[12vh] text-base md:text-lg leading-relaxed font-semibold tracking-wide"
+    >
+      I no longer need your illuminating sight.
+    </span>
 
-  <p class="text-sm tracking-widest opacity-60">
-    — excerpt from <span class="italic">Feathered Angels in the Dark</span> — Noa
-    Ellis
+    <span class="block text-base md:text-lg leading-relaxed opacity-70 italic">
+      You couldn’t teach me to fly,
+    </span>
+
+    <span
+      class="block mt-2 ml-8 pb-[12vh] text-xl md:text-2xl font-semibold leading-relaxed"
+    >
+      So I learned to fall.
+    </span>
+
+    <span class="block text-2xl md:text-3xl font-semibold leading-relaxed">
+      I love you,
+    </span>
+
+    <span
+      class="block mt-2 mb-1 ml-8 pb-[6vh] text-base md:text-lg leading-relaxed opacity-70 italic"
+    >
+      See you in the next life.
+    </span>
+
+    <span class="block text-sm tracking-widest opacity-60">
+      — excerpt from <span class="italic">Feathered Angels in the Dark</span> — Noa
+      Ellis
+    </span>
   </p>
 </div>
 
 <hr class="bg-white h-px mt-8 border-0.5 border-white opacity-70" />
 
-<span class="text-white font-mono font-semibold text-[clamp(1.6rem,40vw,2rem)] mt-12 mb-1.5">
-  Vikas Banerjee Murthy
-</span><br/>
+<section class="fade-in-scroll">
+  <span
+    class="text-white font-mono font-semibold text-[clamp(1.6rem,40vw,2rem)] mt-12 mb-1.5"
+  >
+    Vikas Banerjee Murthy
+  </span><br />
 
-<p class="text-gray-400 font-mono text-sm">{discordUserState}</p>
-<link rel="image" href={file_480} />
-<div
-  class="inline-flex flex-row gap-1 justify-between content-stretch w-full h-auto
+  <p class="text-gray-400 font-mono text-sm">{discordUserState}</p>
+</section>
+
+<section class="fade-in-scroll">
+  <link rel="image" href={file_480} />
+  <div
+    class="inline-flex flex-row gap-1 justify-between content-stretch w-full h-auto
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   bg-[hsl(215.09_46.09%_22.55%)]
   bg-[repeating-linear-gradient(transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(270deg,_transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(125deg,_transparent,_transparent_2px,_rgba(0,0,0,.06)_2px,_rgba(0,0,0,.06)_3px,_transparent_3px,_transparent_5px,_rgba(0,0,0,.06)_5px)]
   "
->
-  <div
-    class="m-2.5 border-5 border-aroace-yellow rounded-full
+  >
+    <div
+      class="m-2.5 border-5 border-aroace-yellow rounded-full
     w-55 h-55 transition-[width, height] duration-1000 ease-in-out
     shrink-0 overflow-hidden hover:w-90 hover:h-90"
-    role="tooltip"
-    id="file_480"
-  >
-    <img class="block object-cover" src={file_480} alt="" />
-  </div>
-  <div
-    class="inline-flex flex-wrap flex-col justify-around
+      role="tooltip"
+      id="file_480"
+    >
+      <img class="block object-cover" src={file_480} alt="" />
+    </div>
+    <div
+      class="inline-flex flex-wrap flex-col justify-around
     h-auto w-auto text-aroace-dark-blue font-mono text-xs m-2.5 p-2.5
     border-5 border-aroace-orange rounded-lg
   bg-aroace-light-blue"
-  >
-    <p>
-      <em>Vikas [also mr_lemoncello and Noa Ellis] - they/them</em>
-    </p>
-    <p>
-      English, ein bisschen Deutsch, 一点普通话.<br />
-      I like lots of stuff, but I'm too lazy to write it all here. Here's a few for
-      your troubles: poetry/writing, filmmaking, music, biking. Born Aug 2011.
-    </p>
-    <span class="mb-1">some music :3&nbsp;</span><audio
-      controls
-      id="myAudioPlayer"
-      autoplay
-      class="pt-0 mt-0 h-auto w-full shadow-[0px_0px_25px_3px_rgba(255,0,128,0.8)]"
     >
-      Your browser does not support the audio element.
-    </audio>
+      <p>
+        <em>Vikas [also mr_lemoncello and Noa Ellis] - they/them</em>
+      </p>
+      <p>
+        English, ein bisschen Deutsch, 一点普通话.<br />
+        I like lots of stuff, but I'm too lazy to write it all here. Here's a few
+        for your troubles: poetry/writing, filmmaking, music, biking. Born Aug 2011.
+      </p>
+      <span class="mb-1">some music :3&nbsp;</span><audio
+        controls
+        id="myAudioPlayer"
+        autoplay
+        class="pt-0 mt-0 h-auto w-full shadow-[0px_0px_25px_3px_rgba(255,0,128,0.8)]"
+      >
+        Your browser does not support the audio element.
+      </audio>
+    </div>
   </div>
-</div>
-<div
-  class="inline-flex flex-row flex-wrap gap-1 justify-between content-stretch w-auto h-auto
+</section>
+
+<section class="fade-in-scroll">
+  <div
+    class="inline-flex flex-row flex-wrap gap-1 justify-between content-stretch w-auto h-auto
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
 bg-[hsl(215.09_46.09%_22.55%)]
   bg-[repeating-linear-gradient(transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(270deg,_transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(125deg,_transparent,_transparent_2px,_rgba(0,0,0,.06)_2px,_rgba(0,0,0,.06)_3px,_transparent_3px,_transparent_5px,_rgba(0,0,0,.06)_5px)]
 "
->
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+  >
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
      border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-a1"
-    tabindex="-1"
-    onclick={mybutton_a1}
-    onkeydown={mybutton_a1}
-    onmouseover={() => change_color("my-button-a1", "#9FCCE7")}
-    onfocus={() => change_color("my-button-a1", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-a1", "#5faad7")}
-    onblur={() => change_color("my-button-a1", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-a1"
+      tabindex="-1"
+      onclick={mybutton_a1}
+      onkeydown={mybutton_a1}
+      onmouseover={() => change_color("my-button-a1", "#9FCCE7")}
+      onfocus={() => change_color("my-button-a1", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-a1", "#5faad7")}
+      onblur={() => change_color("my-button-a1", "#5faad7")}
     >
-      Resume
-    </div>
-  </my-button>
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Resume
+      </div>
+    </my-button>
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-a2"
-    tabindex="-1"
-    onclick={mybutton_a2}
-    onkeydown={mybutton_a2}
-    onmouseover={() => change_color("my-button-a2", "#9FCCE7")}
-    onfocus={() => change_color("my-button-a2", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-a2", "#5faad7")}
-    onblur={() => change_color("my-button-a2", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-a2"
+      tabindex="-1"
+      onclick={mybutton_a2}
+      onkeydown={mybutton_a2}
+      onmouseover={() => change_color("my-button-a2", "#9FCCE7")}
+      onfocus={() => change_color("my-button-a2", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-a2", "#5faad7")}
+      onblur={() => change_color("my-button-a2", "#5faad7")}
     >
-      Poetry Books
-    </div>
-  </my-button>
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Poetry Books
+      </div>
+    </my-button>
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
      border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-a3"
-    tabindex="-1"
-    onclick={mybutton_a3}
-    onkeydown={mybutton_a3}
-    onmouseover={() => change_color("my-button-a3", "#9FCCE7")}
-    onfocus={() => change_color("my-button-a3", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-a3", "#5faad7")}
-    onblur={() => change_color("my-button-a3", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-a3"
+      tabindex="-1"
+      onclick={mybutton_a3}
+      onkeydown={mybutton_a3}
+      onmouseover={() => change_color("my-button-a3", "#9FCCE7")}
+      onfocus={() => change_color("my-button-a3", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-a3", "#5faad7")}
+      onblur={() => change_color("my-button-a3", "#5faad7")}
     >
-      Published Work
-    </div>
-  </my-button>
-</div>
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Published Work
+      </div>
+    </my-button>
+  </div>
+</section>
 
 <div class="hidden m-2" id="resume">
-  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Resume</h2>
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Resume
+  </h2>
   <div class="w-250 h-auto">
     <img src={resume} alt="" />
   </div>
@@ -759,7 +1000,9 @@ bg-[hsl(215.09_46.09%_22.55%)]
 </div>
 
 <div class="hidden m-2" id="poetry">
-  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Poetry Books</h2>
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Poetry Books
+  </h2>
   <div class="inline text-red-600 font-mono text-2xl py-3 px-1">
     Bundle Deal:
   </div>
@@ -1180,7 +1423,9 @@ bg-[hsl(215.09_46.09%_22.55%)]
 </div>
 
 <div class="hidden m-2" id="published">
-  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Published Work</h2>
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Published Work
+  </h2>
   <details>
     <summary class="text-white font-mono text-xl mb-0">
       &nbsp;<em>Destination</em> - Published Dec 2025
@@ -2183,83 +2428,89 @@ bg-[hsl(215.09_46.09%_22.55%)]
   </details>
 </div>
 
-<h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Creative Endeavors</h2>
+<section class="fade-in-scroll">
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Creative Endeavors
+  </h2>
 
-<div
-  class="inline-flex flex-wrap flex-row gap-1 justify-between content-stretch w-auto h-auto
+  <div
+    class="inline-flex flex-wrap flex-row gap-1 justify-between content-stretch w-auto h-auto
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   bg-[hsl(215.09_46.09%_22.55%)]
   bg-[repeating-linear-gradient(transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(270deg,_transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(125deg,_transparent,_transparent_2px,_rgba(0,0,0,.06)_2px,_rgba(0,0,0,.06)_3px,_transparent_3px,_transparent_5px,_rgba(0,0,0,.06)_5px)]
 "
->
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+  >
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-b1"
-    tabindex="-1"
-    onclick={mybutton_b1}
-    onkeydown={mybutton_b1}
-    onmouseover={() => change_color("my-button-b1", "#9FCCE7")}
-    onfocus={() => change_color("my-button-b1", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-b1", "#5faad7")}
-    onblur={() => change_color("my-button-b1", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-b1"
+      tabindex="-1"
+      onclick={mybutton_b1}
+      onkeydown={mybutton_b1}
+      onmouseover={() => change_color("my-button-b1", "#9FCCE7")}
+      onfocus={() => change_color("my-button-b1", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-b1", "#5faad7")}
+      onblur={() => change_color("my-button-b1", "#5faad7")}
     >
-      Editing Projects
-    </div>
-  </my-button>
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Editing Projects
+      </div>
+    </my-button>
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-b2"
-    tabindex="-1"
-    onclick={mybutton_b2}
-    onkeydown={mybutton_b2}
-    onmouseover={() => change_color("my-button-b2", "#9FCCE7")}
-    onfocus={() => change_color("my-button-b2", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-b2", "#5faad7")}
-    onblur={() => change_color("my-button-b2", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-b2"
+      tabindex="-1"
+      onclick={mybutton_b2}
+      onkeydown={mybutton_b2}
+      onmouseover={() => change_color("my-button-b2", "#9FCCE7")}
+      onfocus={() => change_color("my-button-b2", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-b2", "#5faad7")}
+      onblur={() => change_color("my-button-b2", "#5faad7")}
     >
-      Essay Samples
-    </div>
-  </my-button>
-  <my-button
-    class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Essay Samples
+      </div>
+    </my-button>
+    <my-button
+      class="inline-flex justify-center content-center m-2.5 pl-8 pr-8 pt-2 pb-2
     border-5 border-aroace-yellow rounded-lg bg-aroace-light-blue
     transition-[width, height] duration-500 ease-in-out hover:scale-110"
-    role="button"
-    id="my-button-b3"
-    tabindex="-1"
-    onclick={mybutton_b3}
-    onkeydown={mybutton_b3}
-    onmouseover={() => change_color("my-button-b3", "#9FCCE7")}
-    onfocus={() => change_color("my-button-b3", "#9FCCE7")}
-    onmouseout={() => change_color("my-button-b3", "#5faad7")}
-    onblur={() => change_color("my-button-b3", "#5faad7")}
-  >
-    <div
-      class="inline-flex justify-evenly content-start
-    text-aroace-dark-blue font-mono xs text-center"
+      role="button"
+      id="my-button-b3"
+      tabindex="-1"
+      onclick={mybutton_b3}
+      onkeydown={mybutton_b3}
+      onmouseover={() => change_color("my-button-b3", "#9FCCE7")}
+      onfocus={() => change_color("my-button-b3", "#9FCCE7")}
+      onmouseout={() => change_color("my-button-b3", "#5faad7")}
+      onblur={() => change_color("my-button-b3", "#5faad7")}
     >
-      Worldbuilding
-    </div>
-  </my-button>
-</div>
-<br />
+      <div
+        class="inline-flex justify-evenly content-start
+    text-aroace-dark-blue font-mono xs text-center"
+      >
+        Worldbuilding
+      </div>
+    </my-button>
+  </div>
+  <br />
+</section>
 
 <div class="hidden m-2" id="editing">
-  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Editing Projects</h2>
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Editing Projects
+  </h2>
   <p class="text-white font-mono text-xl">
     Ink and Blood: The Lines That Divide Us
   </p>
@@ -2421,7 +2672,9 @@ bg-[hsl(215.09_46.09%_22.55%)]
 </div>
 
 <div class="hidden m-2" id="essays">
-  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Essays</h2>
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Essays
+  </h2>
   <details>
     <summary class="text-white font-mono text-xl mb-0">
       &nbsp;Emotionally Abusive Parenting and the Societal Structures That
@@ -2486,9 +2739,9 @@ bg-[hsl(215.09_46.09%_22.55%)]
       that sabotage psychological stability and emotional literacy, as children
       oscillate between seeking comfort from and protecting themselves against
       the same adult, all the while learning that their feelings are
-      unacceptable or irrelevant.<sup>3</sup> These outcomes are not developmental
-      quirks; they are psychological injuries inflicted at an age when children lack
-      any means of self-defense.
+      unacceptable or irrelevant.<sup>3</sup>
+      These outcomes are not developmental quirks; they are psychological injuries
+      inflicted at an age when children lack any means of self-defense.
     </p>
     <p class="text-white font-mono text-sm indent-8 mb-0">
       The long-term psychological consequences of emotional abuse constitute a
@@ -2569,13 +2822,13 @@ bg-[hsl(215.09_46.09%_22.55%)]
       sensitively to their cues, and maintaining a predictable and loving
       environment. According to attachment theory, children who form secure
       attachments with caregivers develop better emotional regulation, social
-      competence, and resilience.<sup>17</sup> Securely attached children show
-      lower levels of anxiety and depression. They also perform better
-      academically and socially.<sup>18</sup> Incorporating secure attachment into
-      parenting involves consistently meeting the child’s needs for comfort and security
-      while also providing the freedom to explore their world from a secure base,
-      which is done in three ways: responsiveness, consistency in structure, and
-      autonomy-supporting.
+      competence, and resilience.<sup>17</sup>
+      Securely attached children show lower levels of anxiety and depression. They
+      also perform better academically and socially.<sup>18</sup> Incorporating secure
+      attachment into parenting involves consistently meeting the child’s needs for
+      comfort and security while also providing the freedom to explore their world
+      from a secure base, which is done in three ways: responsiveness, consistency
+      in structure, and autonomy-supporting.
     </p>
     <p class="text-white font-mono text-sm indent-8 mb-0">
       Responsive parenting means engaging with children in a consistent,
@@ -2588,10 +2841,10 @@ bg-[hsl(215.09_46.09%_22.55%)]
       to learn to understand and manage their own emotions. Psychologist John
       Gottman coined the term “emotion coaching,” where parents validate
       emotions and guide children in managing them, linked to fewer behavioral
-      problems and better peer relationships.<sup>20</sup> High emotional
-      availability is also linked to secure attachment and resilience. Noticing
-      and appropriately reacting to a child's needs is linked to better language
-      development, emotional intelligence, and problem-solving skills,<sup
+      problems and better peer relationships.<sup>20</sup>
+      High emotional availability is also linked to secure attachment and resilience.
+      Noticing and appropriately reacting to a child's needs is linked to better
+      language development, emotional intelligence, and problem-solving skills,<sup
         >21</sup
       >
       and it is found that responsiveness predicts improvements in children’s cognitive
@@ -2908,8 +3161,8 @@ bg-[hsl(215.09_46.09%_22.55%)]
       is our ability to cooperate.” Both are microcosmic: Golding depicts morality
       crumbling in isolation, but a real scenario under similar conditions suggests
       that humanity persists and thrives. One could even say that living within society
-      is worse. At very young ages, humans are altruistic<sup>2</sup> and
-      egalitarian, sharing resources,<sup>3</sup>
+      is worse. At very young ages, humans are altruistic<sup>2</sup>
+      and egalitarian, sharing resources,<sup>3</sup>
       whether or not they were obtained in collaboration.
       <sup>4</sup> After many years of society’s training, humans grow
       complacent. In 1961, the Milgram Experiment showed that 64% of
@@ -3136,9 +3389,9 @@ bg-[hsl(215.09_46.09%_22.55%)]
       These would meet in private and afterwards communicate their decisions to the
       others,” showing how communism both in Animal Farm and in Russia adapted to
       be so different from its stated purpose that it ended up largely similar to
-      the very regime it intended to establish,<sup>6</sup> and “four legs good,
-      two legs bad,” showing the sheer ignorance and complacency of the public
-      for believing in the regime.<sup>7</sup>
+      the very regime it intended to establish,<sup>6</sup>
+      and “four legs good, two legs bad,” showing the sheer ignorance and complacency
+      of the public for believing in the regime.<sup>7</sup>
       Both Animal Farm and Nineteen Eighty-Four emerged as direct responses to the
       events of his time. Animal Farm was published in 1945, at a time when the Soviet
       Union was emerging as a global superpower, and its portrayal of the corrupting
@@ -3200,17 +3453,17 @@ bg-[hsl(215.09_46.09%_22.55%)]
       opponents in Nicaragua, Iran, and Russia; no-contest elections in Syria,
       Kazakhstan, and Uzbekistan; power grabs in Sudan, Chad, and Guinea; and
       the populist and authoritarian tendencies by president of the United
-      States, Donald Trump.<sup>11</sup> The Trump administration plans to
-      accomplish its goals through three methods of control which are
-      illustrated in the writings of Orwell. The first is the decimation of
-      freedom of speech, which Trump has gone about in a variety of ways, one of
-      the most crucial is control of the media. Before taking office, Trump sued
-      ABC and CBS News over coverage he deemed defamatory,<sup>12,13</sup> a
-      tactic not used before by any president and a canary in a coalmine for the
-      future of press freedom in the United States. Trump barred the Associated
-      Press, a pillar of White House coverage for more than a century,<sup
-        >14</sup
+      States, Donald Trump.<sup>11</sup>
+      The Trump administration plans to accomplish its goals through three methods
+      of control which are illustrated in the writings of Orwell. The first is the
+      decimation of freedom of speech, which Trump has gone about in a variety of
+      ways, one of the most crucial is control of the media. Before taking office,
+      Trump sued ABC and CBS News over coverage he deemed defamatory,<sup
+        >12,13</sup
       >
+      a tactic not used before by any president and a canary in a coalmine for the
+      future of press freedom in the United States. Trump barred the Associated Press,
+      a pillar of White House coverage for more than a century,<sup>14</sup>
       from the Oval Office and Air Force One for refusing to use "Gulf of America"
       instead of "Gulf of Mexico" after he made the change by decree. The third-largest
       newspaper by circulation in the United States is the Washington Post,<sup
@@ -3669,7 +3922,8 @@ bg-[hsl(215.09_46.09%_22.55%)]
       for every 10 µg/m<sup>3</sup> increase of PM<sub>10</sub>. Individuals
       with higher exposure have a 9% greater risk of death from cardiovascular
       causes, and the confidence intervals indicate the risk could range from no
-      increase to 18% higher. A 10 μg/m<sup>3</sup> increase in PM<sup>2.5</sup>
+      increase to 18% higher. A 10 μg/m<sup>3</sup>
+      increase in PM<sup>2.5</sup>
       exposure was associated with a 1.11 times higher risk of lung cancer mortality
       and a 1.08 times higher risk of lung cancer incidence with confidence intervals
       that indicate the risk could range from 3% to 18% higher. PM<sub>2.5</sub>
@@ -3789,9 +4043,10 @@ bg-[hsl(215.09_46.09%_22.55%)]
       temperature. The year-round average for Kolkata in 2023 was 82.6°F, which
       is very, very high. Air pollution levels spike when temperatures rise.
       High temperatures can lead to more frequent droughts and more intense
-      wildfires, both of which increase particulate matter (PM<sub>10</sub> and
-      PM<sub>2.5</sub>). Fires also release large amounts of EC, NO<sub>x</sub>,
-      CO and VOCs. Heat also accelerates biological processes responsible for
+      wildfires, both of which increase particulate matter (PM<sub>10</sub>
+      and PM<sub>2.5</sub>). Fires also release large amounts of EC, NO<sub
+        >x</sub
+      >, CO and VOCs. Heat also accelerates biological processes responsible for
       the degradation of organic waste and wastewater, releasing both air
       pollutants and greenhouse gases into the air. Warmer temperatures also
       accelerate the reactions that form ozone.<sup>25,26</sup>
@@ -4278,79 +4533,87 @@ bg-[hsl(215.09_46.09%_22.55%)]
   </details>
 </div>
 
-<h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">Contact</h2>
+<section class="fade-in-scroll">
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-3">
+    Contact
+  </h2>
 
-<div
-  class="inline-flex flex-row flex-wrap gap-1 justify-between content-center w-full h-auto
+  <div
+    class="inline-flex flex-row flex-wrap gap-1 justify-between content-center w-full h-auto
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   bg-[hsl(215.09_46.09%_22.55%)]
   bg-[repeating-linear-gradient(transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(270deg,_transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(125deg,_transparent,_transparent_2px,_rgba(0,0,0,.06)_2px,_rgba(0,0,0,.06)_3px,_transparent_3px,_transparent_5px,_rgba(0,0,0,.06)_5px)]
 "
->
-  <span
-    class="flex-row content-center text-white font-mono text-xs"
-    id="input1"
   >
-    Name:
-  </span>
-  <input type="text" bind:value={name} /><br />
-  <span
-    class="flex-row content-center text-white font-mono text-xs"
-    id="input2"
-  >
-    Email:
-  </span>
-  <input type="text" bind:value={email} /><br />
-  <span
-    class="flex-row content-center text-white font-mono text-xs"
-    id="input3"
-  >
-    On 1540?
-  </span>
-  <input type="checkbox" id="1540" bind:checked={on1540} /><label for="On 1540?"
-  ></label>
-  <span
-    class="flex-row content-center text-white font-mono text-xs"
-    id="input3"
-  >
-    Interested in buying?
-  </span>
-  <input type="checkbox" bind:checked={isBuyer} /><label
-    for="Interested in buying?"
-  ></label>
-  <my-button
-    class="flex-row content-center text-white font-mono text-sm
+    <span
+      class="flex-row content-center text-white font-mono text-xs"
+      id="input1"
+    >
+      Name:
+    </span>
+    <input type="text" bind:value={name} /><br />
+    <span
+      class="flex-row content-center text-white font-mono text-xs"
+      id="input2"
+    >
+      Email:
+    </span>
+    <input type="text" bind:value={email} /><br />
+    <span
+      class="flex-row content-center text-white font-mono text-xs"
+      id="input3"
+    >
+      On 1540?
+    </span>
+    <input type="checkbox" id="1540" bind:checked={on1540} /><label
+      for="On 1540?"
+    ></label>
+    <span
+      class="flex-row content-center text-white font-mono text-xs"
+      id="input3"
+    >
+      Interested in buying?
+    </span>
+    <input type="checkbox" bind:checked={isBuyer} /><label
+      for="Interested in buying?"
+    ></label>
+    <my-button
+      class="flex-row content-center text-white font-mono text-sm
     transition-[width, height] duration-750 ease-in-out
     hover:scale-110"
-    role="button"
-    tabindex="-1"
-    id="my-button6"
-    onmouseover={() => change_color("my-button6", "#396488")}
-    onfocus={() => change_color("my-button6", "#396488")}
-    onmouseout={() => change_color("my-button6", "#1f3554")}
-    onblur={() => change_color("my-button6", "#1f3554")}
-    onclick={output}
-    onkeydown={output}>Submit</my-button
-  >
-</div>
+      role="button"
+      tabindex="-1"
+      id="my-button6"
+      onmouseover={() => change_color("my-button6", "#396488")}
+      onfocus={() => change_color("my-button6", "#396488")}
+      onmouseout={() => change_color("my-button6", "#1f3554")}
+      onblur={() => change_color("my-button6", "#1f3554")}
+      onclick={output}
+      onkeydown={output}>Submit</my-button
+    >
+  </div>
+</section>
 
-<h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-4">Certifications</h2>
+<section class="fade-in-scroll">
+  <h2 class="text-white font-mono text-[clamp(1rem,20vw,1.5rem)] mt-4">
+    Certifications
+  </h2>
 
-<div
-  class="inline-flex flex-row flex-wrap gap-1 justify-between content-center w-auto h-auto
+  <div
+    class="inline-flex flex-row flex-wrap gap-1 justify-between content-center w-auto h-auto
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   bg-[hsl(215.09_46.09%_22.55%)]
   bg-[repeating-linear-gradient(transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(270deg,_transparent,_transparent_50px,_rgba(0,0,0,.12)_50px,_rgba(0,0,0,.12)_53px,_transparent_53px,_transparent_63px,_rgba(0,0,0,.12)_63px,_rgba(0,0,0,.12)_66px,_transparent_66px,_transparent_116px,_rgba(0,0,0,.15)_116px,_rgba(0,0,0,.15)_166px,_rgba(255,255,255,.05)_166px,_rgba(255,255,255,.05)_169px,_rgba(0,0,0,.15)_169px,_rgba(0,0,0,.15)_179px,_rgba(255,255,255,.05)_179px,_rgba(255,255,255,.05)_182px,_rgba(0,0,0,.15)_182px,_rgba(0,0,0,.15)_232px,_transparent_232px),repeating-linear-gradient(125deg,_transparent,_transparent_2px,_rgba(0,0,0,.06)_2px,_rgba(0,0,0,.06)_3px,_transparent_3px,_transparent_5px,_rgba(0,0,0,.06)_5px)]
 "
->
-  <img src={id_1} alt="" width="200"/>
-  <img src={id_2} alt="" width="200"/>
+  >
+    <img src={id_1} alt="" width="200" />
+    <img src={id_2} alt="" width="200" />
+  </div>
 
-</div>
-
-<br /> <br /> <br /> <br />
-<p class="text-white font-mono text-xs">*cash only</p>
-<br /> <br /> <br />
+  <br /> <br /> <br /> <br />
+  <p class="text-white font-mono text-xs">*cash only</p>
+  <br /> <br /> <br />
+</section>
 
 <div
   id="footer"

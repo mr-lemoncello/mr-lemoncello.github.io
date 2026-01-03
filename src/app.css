@@ -7,3 +7,13 @@
     --color-aroace-orange: #e38d00;
     --custom-grey: #1c1c1e;
 }
+
+.not-in-view {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.in-view {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
