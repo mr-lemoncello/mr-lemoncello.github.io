@@ -320,7 +320,7 @@
       id="file_480"
       aria-label="Photo of Vikas Banerjee Murthy"
     >
-      <img class="block object-cover" src={file_480} alt="" />
+      <img class="block object-cover" src={file_480} alt="" loading=lazy/>
     </div>
     <div
       class="inline-flex flex-wrap flex-col justify-around
@@ -1252,8 +1252,8 @@
   border-5 border-aroace-dark-blue rounded-lg p-1 m-3
   flex-background"
   >
-    <img src={id_1} alt="" width="200" />
-    <img src={id_2} alt="" width="200" />
+    <img src={id_1} alt="" width="200" loading=lazy/>
+    <img src={id_2} alt="" width="200" loading=lazy/>
   </div>
 
   <br /> <br /> <br /> <br />

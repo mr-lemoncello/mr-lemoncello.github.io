@@ -9,6 +9,7 @@ const config = {
   },
   kit: {
     adapter: adapter({
+      out: '.',
       fallback: '404.html'
     }),
     paths: {
