@@ -13,7 +13,7 @@
         >
             <span
                 class={`no-underline ${
-                    ["resume", "contact"].includes(active)
+                    ["resume"].includes(active)
                         ? "underline underline-offset-8"
                         : ""
                 }`}
@@ -32,33 +32,25 @@
             >
                 Resume
             </a>
-            <a
-                href="/contact"
-                class="block px-4 py-3 text-[#1C1C1C]! hover:bg-gray-300 no-underline! hover:no-underline! visited:text-[#1C1C1C]!"
-            >
-                Contact
-            </a>
         </div>
     </div>
 
-    <!-- Creative -->
     <div class="relative group">
-        <a
-            href="/"
-            target="_self"
-            class="text-[20px] text-white py-3.5 px-4 flex items-center gap-1 hover:bg-[rgba(140,179,223,0.7)] no-underline! hover:no-underline!"
-        >
-            <span
-                class={`no-underline ${
-                    ["writing", "programming", "music"].includes(active)
-                        ? "underline underline-offset-8"
-                        : ""
-                }`}
-            >
-                Creative Endeavors
-            </span>
-            <em class="text-[20px] fa fa-caret-down"></em>
-        </a>
+<button
+    type="button"
+    class="m-0! border-0! bg-transparent! p-0! text-[20px]! font-[PrestigeElite] font-normal leading-normal text-white appearance-none"
+>
+    <span
+        class={`flex items-center gap-1 px-4 py-3.5 hover:bg-[rgba(140,179,223,0.7)] ${
+            ["writing", "programming", "music"].includes(active)
+                ? "underline underline-offset-8"
+                : ""
+        }`}
+    >
+        Creative Endeavors
+        <em class="text-[20px] fa fa-caret-down"></em>
+    </span>
+</button>
 
         <div
             class="absolute right-0 hidden min-w-40 bg-[#f9f9f9] shadow-lg group-hover:block z-10"

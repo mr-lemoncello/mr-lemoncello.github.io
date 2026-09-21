@@ -1,7 +1,7 @@
 <script lang="ts">
     import AudioPlayer from "$lib/components/AudioPlayer.svelte";
     import Navbar from "$lib/components/Navbar.svelte";
-    import Footer from "$lib/components/Footer.svelte";
+    import Links from "$lib/components/Links.svelte";
     import Particles from "$lib/components/Particles.svelte";
     import DayNight from "$lib/components/DayNight.svelte";
     import Clouds from "$lib/components/Clouds.svelte";
@@ -136,7 +136,13 @@
     {/each}
 </section>
 
-<Footer />
+<footer class="bg-[rgba(13,16,18,0.75)] border-t border-white/10">
+    <div class="max-w-6xl mx-auto py-8 flex justify-center">
+        <div class="flex flex-wrap justify-center gap-4">
+            <Links fontSize="sm" diameter="12"/>
+        </div>
+    </div>
+</footer>
 
 <style>
     :global(body)::before {
