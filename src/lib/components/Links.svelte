@@ -47,6 +47,31 @@
         return textSizes[index + 4];
     }
 
+    const diameterClasses: Record<string, string> = {
+        "8": "h-8 w-8",
+        "10": "h-10 w-10",
+        "12": "h-12 w-12",
+        "14": "h-14 w-14",
+        "16": "h-16 w-16",
+        "20": "h-20 w-20",
+    };
+
+    const fontSizeClasses: Record<string, string> = {
+        xs: "text-xs",
+        sm: "text-sm",
+        md: "text-md",
+        lg: "text-lg",
+        xl: "text-xl",
+        "2xl": "text-2xl",
+        "3xl": "text-3xl",
+        "4xl": "text-4xl",
+        "5xl": "text-5xl",
+        "6xl": "text-6xl",
+        "7xl": "text-7xl",
+        "8xl": "text-8xl",
+        "9xl": "text-9xl",
+    };
+
     function enter(label: HTMLSpanElement, icon: HTMLElement) {
         animate(label, {
             width: label.scrollWidth,
@@ -119,13 +144,13 @@
                 )}
         >
             <div
-                class={`icon h-${diameter} w-${diameter} flex items-center justify-center rounded-full text-${textSizePlus4(fontSize)} transition-all duration-300 ${link.hover} ${link.glow}`}
+                class={`icon ${diameterClasses[diameter]} flex items-center justify-center rounded-full ${fontSizeClasses[textSizePlus4(fontSize)]} transition-all duration-300 ${link.hover} ${link.glow}`}
             >
                 <i class={`${link.iconStyle} ${link.icon}`}></i>
             </div>
 
             <span
-                class={`text-${fontSize} font-semibold tracking-wide overflow-hidden whitespace-nowrap`}
+                class={`${fontSizeClasses[fontSize]} font-semibold tracking-wide overflow-hidden whitespace-nowrap`}
                 style="width:0; opacity:0"
             >
                 {link.name}
